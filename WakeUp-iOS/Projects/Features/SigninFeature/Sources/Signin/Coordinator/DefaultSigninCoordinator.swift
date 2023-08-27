@@ -30,6 +30,7 @@ public final class DefaultSigninCoordinator: SigninCoordinator {
         let viewModel = SigninViewModel()
         
         signinVC.bind(to: viewModel)
+        viewModel.coordinator = self
         
         self.navigationController.pushViewController(signinVC, animated: true)
     }

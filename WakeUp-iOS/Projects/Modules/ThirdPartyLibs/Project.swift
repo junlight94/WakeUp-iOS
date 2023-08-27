@@ -7,12 +7,12 @@ let project = Project.makeModule(
     targets: [.dynamicFramework],
     internalDependencies: [
         .SPM.Moya,
-        .SPM.PinLayout,
         .SPM.RxCocoa,
         .SPM.RxRelay,
         .SPM.RxSwift,
         .SPM.Swinject,
         .SPM.Then,
-        .Carthage.FlexLayout
+        .Carthage.FlexLayout,
+        .Carthage.PinLayout
     ]
 )
