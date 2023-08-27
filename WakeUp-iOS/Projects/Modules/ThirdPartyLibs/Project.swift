@@ -6,7 +6,7 @@ let project = Project.makeModule(
     name: "ThirdPartyLibs",
     targets: [.dynamicFramework],
     internalDependencies: [
-        .SPM.Alamofire,
+        .SPM.Moya,
         .SPM.PinLayout,
         .SPM.RxCocoa,
         .SPM.RxRelay,
