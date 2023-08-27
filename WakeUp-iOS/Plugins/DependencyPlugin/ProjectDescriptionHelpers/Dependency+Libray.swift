@@ -20,7 +20,6 @@ public extension TargetDependency.SPM {
     static let RxCocoa = TargetDependency.external(name: "RxCocoa")
     static let RxRelay = TargetDependency.external(name: "RxRelay")
     static let PinLayout = TargetDependency.external(name: "PinLayout")
-    
 }
 
 public extension TargetDependency.Carthage {
