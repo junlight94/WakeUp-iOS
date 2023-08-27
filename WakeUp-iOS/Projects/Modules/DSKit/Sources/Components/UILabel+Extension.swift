@@ -6,4 +6,12 @@
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
-import Foundation
+import UIKit
+
+public extension UILabel {
+    @discardableResult
+    func setTypo(_ typo: SansNeo, size: CGFloat) -> Self {
+        self.font = .setFont(font: typo, size: size)
+        return self
+    }
+}

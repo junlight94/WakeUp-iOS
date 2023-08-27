@@ -6,4 +6,8 @@
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
-import Foundation
+import UIKit
+
+public extension UIImage {
+    static let signinImage = UIImage(named: "SignInImage")
+}

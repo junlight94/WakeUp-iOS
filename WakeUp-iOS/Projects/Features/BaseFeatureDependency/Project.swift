@@ -6,6 +6,7 @@ let project = Project.makeModule(
     name: "BaseFeatureDependency",
     targets: [.dynamicFramework],
     internalDependencies: [
-        .domain
+        .domain,
+        .Modules.dsKit
     ]
 )
