@@ -20,9 +20,9 @@ let spm = SwiftPackageManagerDependencies([
 
 let carthage = CarthageDependencies([
     .github(path: "layoutBox/FlexLayout",
-                        requirement: .branch("master")),
-                .github(path: "layoutBox/PinLayout",
-                        requirement: .branch("master")),
+            requirement: .branch("master")),
+    .github(path: "layoutBox/PinLayout",
+            requirement: .branch("master")),
 ])
 
 let dependencies = Dependencies(
