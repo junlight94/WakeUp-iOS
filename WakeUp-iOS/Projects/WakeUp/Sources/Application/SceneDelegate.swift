@@ -9,12 +9,11 @@
 import UIKit
 import RootFeature
 import BaseFeatureDependency
-import FlexLayout
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-//    var appCoordinator: AppCoordinator?
+    var appCoordinator: AppCoordinator?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
@@ -23,8 +22,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
-//        appCoordinator = DefaultAppCoordinator(navigationController)
-//        appCoordinator?.start()
+        appCoordinator = DefaultAppCoordinator(navigationController)
+        appCoordinator?.start()
         
     }
     

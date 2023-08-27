@@ -6,24 +6,23 @@
 //
 
 import Foundation
-import Swinject
 import Domain
 import Network
 import Data
 import Core
 
 extension AppDelegate {
-//    var container: DIContainer {
-//        DIContainer.shared
-//    }
-//    
-//    func registerDependencies() {
-//        
-//        // MARK: - Repository
+    var container: DIContainer {
+        DIContainer.shared
+    }
+
+    func registerDependencies() {
+
+        // MARK: - Repository
 //        container.register(interface: APIManager.self) { _ in DefaultAPIManager() }
-//        
-//        // MARK: - UseCase
+
+        // MARK: - UseCase
 //        container.register(interface: SplashUseCase.self) { _ in Splash() }
-//    }
+    }
 }
 

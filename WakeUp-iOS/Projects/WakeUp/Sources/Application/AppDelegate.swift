@@ -21,7 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
         
         /// 모든 의존성 생성
-//        registerDependencies()
+        registerDependencies()
         
         
         return true
