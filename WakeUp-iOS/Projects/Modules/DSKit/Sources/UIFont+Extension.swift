@@ -35,10 +35,8 @@ public enum SansNeo: String {
 public extension UIFont {
     static func setFont(font: SansNeo, size: CGFloat) -> UIFont {
         guard let font = UIFont(name: font.font, size: size) else {
-            print("폰트 적용 실패")
             return UIFont.systemFont(ofSize: size)
         }
-        print("폰트 적용 성공")
         return font
     }
 }
