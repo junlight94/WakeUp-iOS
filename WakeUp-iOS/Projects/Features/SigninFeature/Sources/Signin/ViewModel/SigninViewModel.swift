@@ -13,6 +13,7 @@ import BaseFeatureDependency
 final class SigninViewModel: ViewModelType {
     
     private let disposeBag = DisposeBag()
+    var coordinator: SigninCoordinator?
     
     struct Input {
         
