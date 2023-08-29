@@ -8,6 +8,7 @@
 
 import UIKit
 import Core
+import DSKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -23,6 +24,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         /// 모든 의존성 생성
         registerDependencies()
         
+        /// 폰트 생성
+        Fonts.fontInitialize()
         
         return true
     }
