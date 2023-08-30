@@ -12,7 +12,6 @@ import FlexLayout
 import PinLayout
 import DSKit
 
-
 import BaseFeatureDependency
 
 final class WaitingRoomMainView: BaseFlexScrollableView {

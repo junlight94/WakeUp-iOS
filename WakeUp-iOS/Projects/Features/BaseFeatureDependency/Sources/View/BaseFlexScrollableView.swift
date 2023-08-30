@@ -6,7 +6,7 @@
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
-//import FlexLayout
+import FlexLayout
 import UIKit
 
 open class BaseFlexScrollableView: UIView {

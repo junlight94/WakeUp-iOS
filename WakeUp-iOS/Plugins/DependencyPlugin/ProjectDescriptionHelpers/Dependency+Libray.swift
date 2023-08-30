@@ -19,6 +19,8 @@ public extension TargetDependency.SPM {
     static let RxSwift = TargetDependency.external(name: "RxSwift")
     static let RxCocoa = TargetDependency.external(name: "RxCocoa")
     static let RxRelay = TargetDependency.external(name: "RxRelay")
+    static let AgoraUIKit = TargetDependency.external(name: "AgoraUIKit")
+    static let AgoraRtcKit = TargetDependency.external(name: "RtcBasic")
 }
 
 public extension TargetDependency.Carthage {
