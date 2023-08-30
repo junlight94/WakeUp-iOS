@@ -36,7 +36,7 @@ open class BaseFlexScrollableView: UIView {
         scrollView.pin.all()
         contentView.pin.all()
         
-        contentView.flex.layout(mode: .adjustHeight)
+        contentView.flex.layout()
         
         scrollView.contentSize = contentView.frame.size
     }

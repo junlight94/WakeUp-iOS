@@ -21,4 +21,12 @@ public extension UIColor {
     static let grayColor = UIColor(r: 244, g: 244, b: 244, a: 1)
     static let greenColor = UIColor(r: 71, g: 204, b: 71, a: 1)
     static let whiteColor = UIColor(r: 255, g: 255, b: 255, a: 1)
+    
+    static let waitingRoom = WaitingRoomColor()
+}
+
+public struct WaitingRoomColor {
+    public let startTimeColor = UIColor(r: 0, g: 0, b: 0, a: 0.87)
+    public let parcitipantsColor = UIColor(r: 0, g: 0, b: 0, a: 0.6)
+    public let infoBackgroundColor = UIColor(r: 244, g: 244, b: 244, a: 1)
 }
