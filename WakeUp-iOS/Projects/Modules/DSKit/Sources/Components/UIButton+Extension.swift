@@ -13,4 +13,9 @@ public extension UIButton {
         self.setTitle(text, for: .normal)
         self.titleLabel?.font = .setFont(font: typo, size: size)
     }
+
+    func setButton(image: DSKitImage) {
+        guard let image = UIImage(named: image.toName, in: Bundle.module, compatibleWith: nil) else { return }
+        self.setImage(image, for: .normal)
+    }
 }

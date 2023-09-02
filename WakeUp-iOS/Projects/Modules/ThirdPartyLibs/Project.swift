@@ -12,6 +12,8 @@ let project = Project.makeModule(
         .SPM.RxSwift,
         .SPM.Swinject,
         .SPM.Then,
+        .SPM.AgoraRtcKit,
+        .SPM.AgoraUIKit,
         .Carthage.FlexLayout,
         .Carthage.PinLayout
     ]

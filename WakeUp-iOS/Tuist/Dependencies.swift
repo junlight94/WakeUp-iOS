@@ -14,6 +14,8 @@ let spm = SwiftPackageManagerDependencies([
     .remote(url: "https://github.com/Moya/Moya.git", requirement: .exact("15.0.0")),
     .remote(url: "https://github.com/Swinject/Swinject.git", requirement: .exact("2.8.3")),
     .remote(url: "https://github.com/devxoul/Then.git", requirement: .exact("3.0.0")),
+    .remote(url: "https://github.com/AgoraIO-Community/VideoUIKit-iOS.git", requirement: .exact("4.1.1")),
+    .remote(url: "https://github.com/AgoraIO/AgoraRtcEngine_iOS", requirement: .exact("4.2.2")),
 ], baseSettings: Settings.settings(
     configurations: XCConfig.framework
 ))
