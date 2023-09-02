@@ -11,6 +11,6 @@ import FlexLayout
 
 import BaseFeatureDependency
 
-protocol WaitingRoomCoordinator: Coordinator {
+public protocol WaitingRoomCoordinator: Coordinator {
     
 }

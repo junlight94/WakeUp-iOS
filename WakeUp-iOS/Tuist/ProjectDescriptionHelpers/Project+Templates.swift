@@ -14,7 +14,8 @@ public extension Project {
         externalDependencies: [TargetDependency] = [],  // 외부 라이브러리 의존성
         interfaceDependencies: [TargetDependency] = [], // Feature Interface 의존성
         dependencies: [TargetDependency] = [],
-        hasResources: Bool = false
+        hasResources: Bool = false,
+        infoPlist: [String: InfoPlist.Value] = Project.appInfoPlist
     ) -> Project {
         
         let configurationName: ConfigurationName = "DEV"
@@ -29,9 +30,8 @@ public extension Project {
         
         // MARK: - App
         if targets.contains(.app) {
-            let bundleSuffix = name.contains("Demo") ? ".test" : ""
-            let infoPlist = name.contains("Demo") ? Project.demoInfoPlist : Project.appInfoPlist
-            let settings = name.contains("Demo") ? baseSettings.setProvisioningTest() : baseSettings.setProvisioningProd()
+            let bundleSuffix = name
+            let settings = baseSettings.setProvisioning()
             
             
             let target = Target(name: name,
@@ -69,32 +69,6 @@ public extension Project {
                 resources: hasResources ? [.glob(pattern: "Resources/**", excluding: [])] : [],
                 dependencies: internalDependencies + externalDependencies,
                 settings: .settings(base: settings, configurations: XCConfig.framework)
-            )
-            
-            projectTargets.append(target)
-        }
-        
-        // MARK: - Feature Executable
-        if targets.contains(.demo) {
-            let deps: [TargetDependency] = [.target(name: name)]
-            
-            let target = Target(
-                name: "\(name)Demo",
-                platform: platform,
-                product: .app,
-                bundleId: "\(Environment.bundlePrefix).\(name)Demo",
-                deploymentTarget: deploymentTarget,
-                infoPlist: .extendingDefault(with: Project.demoInfoPlist),
-                sources: ["Demo/Sources/**/*.swift"],
-                resources: [.glob(pattern: "Demo/Resources/**", excluding: ["Demo/Resources/dummy.txt"])],
-                dependencies: [
-                    deps,
-                    [
-//                        .SPM.FLEX,
-//                        .SPM.Inject
-                    ]
-                ].flatMap { $0 },
-                settings: .settings(base: baseSettings, configurations: XCConfig.demo)
             )
             
             projectTargets.append(target)

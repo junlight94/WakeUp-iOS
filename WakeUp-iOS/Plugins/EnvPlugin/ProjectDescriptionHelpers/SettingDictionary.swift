@@ -28,12 +28,7 @@ public extension SettingsDictionary {
             .merging(["CODE_SIGN_IDENTITY": SettingValue(stringLiteral: "$(CODE_SIGN_IDENTITY)")])
     }
     
-    func setProvisioningProd() -> SettingsDictionary {
-        merging(["PROVISIONING_PROFILE_SPECIFIER": SettingValue(stringLiteral: "")])
-            .merging(["PROVISIONING_PROFILE": SettingValue(stringLiteral: "")])
-    }
-    
-    func setProvisioningTest() -> SettingsDictionary {
+    func setProvisioning() -> SettingsDictionary {
         merging(["PROVISIONING_PROFILE_SPECIFIER": SettingValue(stringLiteral: "")])
             .merging(["PROVISIONING_PROFILE": SettingValue(stringLiteral: "")])
     }
