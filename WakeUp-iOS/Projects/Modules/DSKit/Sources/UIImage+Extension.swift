@@ -11,6 +11,10 @@ import UIKit
 public enum DSKitImage {
     case DummyImage
     case checkBoxOutlineBlankRounded
+    case videocamRounded
+    case videocamOffRounded
+    case micRounded
+    case micOffRounded
     case checkBoxRounded
     
     var toName: String {
@@ -20,6 +24,14 @@ public enum DSKitImage {
             return "DummyImage"
         case .checkBoxOutlineBlankRounded:
             return "CheckBoxOutlineBlankRounded"
+        case .videocamRounded:
+            return "VideocamRounded"
+        case .videocamOffRounded:
+            return "VideocamOffRounded"
+        case .micRounded:
+            return "MicRounded"
+        case .micOffRounded:
+            return "MicOffRounded"
         case .checkBoxRounded:
             return "CheckBoxRounded"
         }

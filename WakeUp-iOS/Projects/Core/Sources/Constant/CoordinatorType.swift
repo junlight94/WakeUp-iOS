@@ -10,5 +10,5 @@ import Foundation
 
 public enum CoordinatorType {
     case app
-    case signin, meeting, wattingRoom
+    case signin, meeting, waitingRoom
 }
