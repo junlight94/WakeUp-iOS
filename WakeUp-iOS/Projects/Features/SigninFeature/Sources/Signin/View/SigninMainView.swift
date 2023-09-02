@@ -44,7 +44,7 @@ class SigninMainView: BaseFlexScrollableView {
         $0.placeholder = "신청자 이메일"
     }
     
-    let checkButton = UIButton_CheckBox()
+    let checkButton = Button_CheckBox()
     
     let applyButton = Button_General().then {
         $0.setTitle("신청하기", for: .normal)
