@@ -138,7 +138,7 @@ public extension Project {
         : schemes
         
         if name.contains("Demo") {
-            let testAppScheme = Scheme.makeScheme(configs: "TEST", name: name)
+            let testAppScheme = Scheme.makeScheme(configs: "DEV", name: name)
             scheme.append(testAppScheme)
         }
         

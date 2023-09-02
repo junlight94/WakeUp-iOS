@@ -19,6 +19,8 @@ public extension Project {
         "UIRequiresFullScreen": true,
         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
         "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "마이크 권한 설정",
+        "NSCameraUsageDescription": "카메라 권한 설정",
         "UIApplicationSceneManifest": [
             "UIApplicationSupportsMultipleScenes": false,
             "UISceneConfigurations": [
@@ -44,12 +46,14 @@ public extension Project {
         "CFBundleDevelopmentRegion": "ko",
         "CFBundleVersion": "1",
         "CFBundleIdentifier": "com.quriously.qube.test",
-        "CFBundleDisplayName": "WakeUpTest",
+        "CFBundleDisplayName": "WakeUp-Demo",
         "UILaunchStoryboardName": "Launch Screen",
         "UIUserInterfaceStyle": "Light",
         "UIRequiresFullScreen": true,
         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
         "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "마이크 권한 설정",
+        "NSCameraUsageDescription": "카메라 권한 설정",
         "UIApplicationSceneManifest": [
             "UIApplicationSupportsMultipleScenes": false,
             "UISceneConfigurations": [
