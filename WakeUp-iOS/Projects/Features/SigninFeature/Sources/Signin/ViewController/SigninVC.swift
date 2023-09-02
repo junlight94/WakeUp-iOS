@@ -9,6 +9,7 @@
 import UIKit
 import RxSwift
 import RxCocoa
+import RxKeyboard
 
 import Core
 import BaseFeatureDependency
@@ -51,5 +52,12 @@ class SigninVC: BaseVC, ViewModelBindable {
                 self?.mainView.checkButton.isSelected = state
             })
             .disposed(by: disposeBag)
+        
+        RxKeyboard.instance.visibleHeight
+            .drive(with: self, onNext: { this, keyboardHeight in
+                this.mainView.scrollView.contentInset.bottom = keyboardHeight
+            })
+            .disposed(by: disposeBag)
+        
     }
 }

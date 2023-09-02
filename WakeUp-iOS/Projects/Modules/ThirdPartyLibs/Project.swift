@@ -10,6 +10,7 @@ let project = Project.makeModule(
         .SPM.RxCocoa,
         .SPM.RxRelay,
         .SPM.RxSwift,
+        .SPM.RxKeyboard,
         .SPM.Swinject,
         .SPM.Then,
         .SPM.AgoraRtcKit,
