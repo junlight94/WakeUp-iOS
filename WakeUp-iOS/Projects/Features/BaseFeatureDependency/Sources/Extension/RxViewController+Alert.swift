@@ -40,7 +40,10 @@ public extension Reactive where Base: UIViewController {
     var presentAlert: Binder<Alert> {
         return Binder(base) { base, alert in
             let alertController = UIAlertController(title: alert.title, message: alert.message, preferredStyle: .alert)
-            let okAction = UIAlertAction(title: "확인", style: .default)
+            let okAction = UIAlertAction(title: "확인", style: .default, handler: { _ in
+                alert.observer?.onNext(true)
+                alert.observer?.onCompleted()
+            })
             alertController.addAction(okAction)
             base.present(alertController, animated: true)
         }

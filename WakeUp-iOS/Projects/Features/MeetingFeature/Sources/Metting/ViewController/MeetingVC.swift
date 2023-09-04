@@ -168,6 +168,7 @@ class MeetingVC: BaseVC, ViewModelBindable {
                 self.remoteUserIDs.append($0)
                 self.mainView.collectionView.reloadData()
             })
+                .disposed(by: disposeBag)
         
         agoraEngine?.rx.didOfflineOfUid()
             .subscribe(onNext: {
@@ -175,6 +176,8 @@ class MeetingVC: BaseVC, ViewModelBindable {
                 self.remoteUserIDs.append($0)
                 self.mainView.collectionView.reloadData()
             })
+                .disposed(by: disposeBag)
+
     }
     
  

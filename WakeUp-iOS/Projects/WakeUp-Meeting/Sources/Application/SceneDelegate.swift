@@ -12,17 +12,18 @@ import MeetingFeature
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-    var appCoordinator: MeetingCoordinator?
+    var appCoordinator: DefaultMeetingCoordinator?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        
         let navigationController = UINavigationController()
         navigationController.isNavigationBarHidden = true
         
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
-        appCoordinator = DefaultMeetingCoordinator(navigationController: navigationController)
+        appCoordinator = DefaultMeetingCoordinator(navigationController)
         appCoordinator?.start()
     }
     

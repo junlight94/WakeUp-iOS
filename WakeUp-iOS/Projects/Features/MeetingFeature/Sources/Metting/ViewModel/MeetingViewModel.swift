@@ -22,7 +22,7 @@ final class MeetingViewModel: ViewModelType {
     private let disposeBag = DisposeBag()
     var coordinator: MeetingCoordinator?
     
-    let appID = PublishSubject<String>()
+    let appID = <String>()
     let channelName = PublishSubject<String>()
     let tempToken = PublishSubject<String>()
     
@@ -53,6 +53,7 @@ final class MeetingViewModel: ViewModelType {
         
         
         return Output(
+            
             checkUserPermission: permissionrequest.asSignal(onErrorSignalWith: .empty()),
             setUpLocalVideo: setUpLocalVideo.asSignal(onErrorSignalWith: .empty()),
             permissionDenied: permissionDeniedAlert.asSignal(onErrorSignalWith: .empty())
