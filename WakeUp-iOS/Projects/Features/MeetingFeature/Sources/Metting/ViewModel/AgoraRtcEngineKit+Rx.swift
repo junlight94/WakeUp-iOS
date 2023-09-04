@@ -6,6 +6,8 @@
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
+import BaseFeatureDependency
+import AVFoundation
 import AgoraRtcKit
 import Foundation
 import RxCocoa
@@ -30,21 +32,7 @@ extension Reactive where Base: AgoraRtcEngineKit {
     var delegate: AgoraRtcEngineDelegateProxy {
         return AgoraRtcEngineDelegateProxy.proxy(for: base)
     }
-    
-    func joinChannel(byToken token: String?, channelId: String, info: String?, uid: UInt) -> Observable<(channel: String, uid: UInt)> {
-        let success = delegate.didJoinChannelSubject.asObserver().take(1)
-        let error = delegate.didOccurErrorSubject.asObserver()
-            .filter { $0.isCommonError || $0 == .invalidChannelId || $0 == .joinChannelRejected }
-            .take(1)
-            .flatMap { error -> Observable<(channel: String, uid: UInt)> in
-                Observable.error(AgoraRtcRxError.agoraError(error))
-            }
-        
-        return engineInvoke(onSuccess: success, onError: error) {
-            self.base.joinChannel(byToken: token, channelId: channelId, info: info, uid: uid, joinSuccess: nil)
-        }
-    }
-    
+ 
     func leaveChannel() -> Observable<AgoraChannelStats> {
         let success = delegate.didLeaveChannelSubject.asObserver().take(1)
         let error = delegate.didOccurErrorSubject.asObserver()
