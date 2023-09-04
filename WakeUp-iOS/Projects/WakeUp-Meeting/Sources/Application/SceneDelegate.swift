@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
-        appCoordinator = DefaultMeetingCoordinator(navigationController: navigationController)
+        appCoordinator = DefaultMeetingCoordinator(navigationController)
         appCoordinator?.start()
     }
     

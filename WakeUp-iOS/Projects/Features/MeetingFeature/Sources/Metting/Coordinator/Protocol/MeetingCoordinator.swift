@@ -9,6 +9,6 @@
 import Foundation
 import BaseFeatureDependency
 
-protocol MeetingCoordinator: Coordinator {
+public protocol MeetingCoordinator: Coordinator {
     
 }
