@@ -18,7 +18,6 @@ public enum DSKitImage {
     case cellCamOffRounded
     case cellMicOffRounded
     case checkBoxRounded
-
     
     var toName: String {
         switch self {
