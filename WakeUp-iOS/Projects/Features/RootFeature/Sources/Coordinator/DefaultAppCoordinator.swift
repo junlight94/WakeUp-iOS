@@ -29,16 +29,20 @@ public final class DefaultAppCoordinator: AppCoordinator {
     }
     
     public func start() {
-        let signinCoordinator = DefaultSigninCoordinator(self.navigationController)
+//        let signinCoordinator = DefaultSigninCoordinator(self.navigationController)
         self.finishDelegate = self
-        self.childCoordinators.append(signinCoordinator)
-        signinCoordinator.start()
+//        self.childCoordinators.append(signinCoordinator)
+//        signinCoordinator.start()
         
         
 //        let waitingRoomCoordinator = DefaultWaitingRoomCoordinator(self.navigationController)
 //        self.finishDelegate = self
 //        self.childCoordinators.append(waitingRoomCoordinator)
 //        waitingRoomCoordinator.start()
+        
+        let meetingCoordinator = DefaultMeetingCoordinator(self.navigationController)
+        self.childCoordinators.append(meetingCoordinator)
+        meetingCoordinator.start()
     }
     
     public func signinFlow() {

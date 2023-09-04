@@ -16,7 +16,7 @@ let spm = SwiftPackageManagerDependencies([
     .remote(url: "https://github.com/devxoul/Then.git", requirement: .exact("3.0.0")),
     .remote(url: "https://github.com/AgoraIO-Community/VideoUIKit-iOS.git", requirement: .exact("4.1.1")),
     .remote(url: "https://github.com/AgoraIO/AgoraRtcEngine_iOS", requirement: .exact("4.2.2")),
-    .remote(url: "https://github.com/RxSwiftCommunity/RxKeyboard.git", requirement: .exact("2.0.1"))
+    .remote(url: "https://github.com/RxSwiftCommunity/RxKeyboard.git", requirement: .exact("2.0.1")),
 ], baseSettings: Settings.settings(
     configurations: XCConfig.framework
 ))
