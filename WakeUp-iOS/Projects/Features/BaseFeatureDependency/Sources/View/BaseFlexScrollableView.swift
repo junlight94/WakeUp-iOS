@@ -13,6 +13,16 @@ open class BaseFlexScrollableView: UIView {
     let rootFlexContainer = UIView()
     let scrollView = UIScrollView()
     public let contentView = UIView()
+    
+    private var flex_LayoutMode: Flex.LayoutMode?
+    
+    public init(mode: Flex.LayoutMode = .adjustHeight) {
+        self.flex_LayoutMode = mode
+        super.init(frame: .zero)
+        
+        layout()
+    }
+    
     public override init(frame: CGRect) {
         super.init(frame: .zero)
         layout()
@@ -36,7 +46,7 @@ open class BaseFlexScrollableView: UIView {
         scrollView.pin.all()
         contentView.pin.all()
         
-        contentView.flex.layout()
+        contentView.flex.layout(mode: flex_LayoutMode ?? .fitContainer)
         
         scrollView.contentSize = contentView.frame.size
     }

@@ -6,9 +6,6 @@
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
-import UIKit
-import FlexLayout
-
 import BaseFeatureDependency
 
 protocol WaitingRoomCoordinator: Coordinator {
