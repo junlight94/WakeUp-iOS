@@ -7,6 +7,11 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
+import RxKeyboard
+
+import Core
 import BaseFeatureDependency
 
 class SigninVC: BaseVC, ViewModelBindable {
@@ -14,6 +19,8 @@ class SigninVC: BaseVC, ViewModelBindable {
     private let mainView = SigninMainView()
     
     var viewModel: SigninViewModel?
+    
+    private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,7 +34,30 @@ class SigninVC: BaseVC, ViewModelBindable {
     }
     
     func bindViewModel() {
+        guard let viewModel = viewModel else { return }
+        
+        let tapAlarm = mainView.checkButton.rx.tap
+            .map { [weak self] _ -> Bool in
+                guard let self = self else { return false }
+                return mainView.checkButton.isSelected
+            }
+            .asObservable()
+        
+        let input = SigninViewModel.Input(tapAlarm: tapAlarm)
+        
+        let output = viewModel.transform(input: input)
+        
+        output.alarmState
+            .drive(onNext: { [weak self] state in
+                self?.mainView.checkButton.isSelected = state
+            })
+            .disposed(by: disposeBag)
+        
+        RxKeyboard.instance.visibleHeight
+            .drive(with: self, onNext: { this, keyboardHeight in
+                this.mainView.scrollView.contentInset.bottom = keyboardHeight
+            })
+            .disposed(by: disposeBag)
         
     }
-
 }

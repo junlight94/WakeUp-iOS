@@ -17,6 +17,8 @@ public enum DSKitImage {
     case micOffRounded
     case cellCamOffRounded
     case cellMicOffRounded
+    case checkBoxRounded
+
     
     var toName: String {
         switch self {
@@ -37,6 +39,8 @@ public enum DSKitImage {
             return "CellCamOffRounded"
         case .cellMicOffRounded:
             return "CellMicOffRounded"
+        case .checkBoxRounded:
+            return "CheckBoxRounded"
         }
     }
 }

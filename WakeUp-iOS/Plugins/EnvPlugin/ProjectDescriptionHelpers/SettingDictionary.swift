@@ -24,16 +24,11 @@ public extension SettingsDictionary {
     
     func setCodeSignManual() -> SettingsDictionary {
         merging(["CODE_SIGN_STYLE": SettingValue(stringLiteral: "Manual")])
-            .merging(["DEVELOPMENT_TEAM": SettingValue(stringLiteral: "TEAM")])
+            .merging(["DEVELOPMENT_TEAM": SettingValue(stringLiteral: "SUMATJC294")])
             .merging(["CODE_SIGN_IDENTITY": SettingValue(stringLiteral: "$(CODE_SIGN_IDENTITY)")])
     }
     
-    func setProvisioningProd() -> SettingsDictionary {
-        merging(["PROVISIONING_PROFILE_SPECIFIER": SettingValue(stringLiteral: "")])
-            .merging(["PROVISIONING_PROFILE": SettingValue(stringLiteral: "")])
-    }
-    
-    func setProvisioningTest() -> SettingsDictionary {
+    func setProvisioning() -> SettingsDictionary {
         merging(["PROVISIONING_PROFILE_SPECIFIER": SettingValue(stringLiteral: "")])
             .merging(["PROVISIONING_PROFILE": SettingValue(stringLiteral: "")])
     }

@@ -6,8 +6,14 @@
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
-import BaseFeatureDependency
 
-protocol WaitingRoomCoordinator: Coordinator {
+import BaseFeatureDependency
+import UIKit
+
+public protocol WaitingRoomCoordinator: Coordinator {
     
 }
+
+
+
+

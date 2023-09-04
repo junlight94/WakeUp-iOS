@@ -7,6 +7,7 @@
 //
 
 import RxSwift
+import RxCocoa
 
 import BaseFeatureDependency
 
@@ -16,15 +17,21 @@ final class SigninViewModel: ViewModelType {
     var coordinator: SigninCoordinator?
     
     struct Input {
-        
+        let tapAlarm: Observable<Bool>
     }
     
     struct Output {
-        
+        let alarmState: Driver<Bool>
     }
     
     func transform(input: Input) -> Output {
         
-        return Output()
+        let alarmState = input.tapAlarm
+            .map { isSelected in
+                return isSelected ? false : true
+            }
+            .asDriver(onErrorJustReturn: false)
+        
+        return Output(alarmState: alarmState)
     }
 }

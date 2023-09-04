@@ -11,6 +11,6 @@ import FlexLayout
 
 import BaseFeatureDependency
 
-protocol SigninCoordinator: Coordinator {
+public protocol SigninCoordinator: Coordinator {
     
 }
