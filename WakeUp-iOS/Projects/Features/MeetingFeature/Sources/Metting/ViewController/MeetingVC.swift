@@ -20,13 +20,7 @@ import AVFoundation
 import RxSwift
 import RxCocoa
 
-struct VideoCallUser {
-    let uid: UInt
-    let displayName: String
-    var isAudioMuted: Bool
-    var isVideoMuted: Bool
-    var isSpeaking: Bool
-}
+
 
 class MeetingVC: BaseVC, ViewModelBindable {
     
@@ -37,52 +31,25 @@ class MeetingVC: BaseVC, ViewModelBindable {
     var viewModel: MeetingViewModel?
     let disposeBag = DisposeBag()
     
-    let appID = "e2f642e0bf04462fbcaf831501217b6a"
-    var agoraEngine: AgoraRtcEngineKit?
-    let tempToken: String? = "007eJxTYDAxe3Hyq1qia4LbkdYFt1tTGc6pVb2f8v7UHr/iJSFnOw8oMKQapZmZGKUaJKUZmJiYGaUlJSemWRgbmhoYGhmaJ5kl3m75ktIQyMgQsjaTgREKQXxWhhDX4BATBgYABb0hlQ=="
-    var userID: UInt = 0
-    var userName: String? = nil
-    var channelName = "TEST4"
     var remoteUserIDs: [UInt] = []
-    var userRole: AgoraClientRole = .broadcaster
-    var joined: Bool = false {
-        didSet {
-            DispatchQueue.main.async {
-                
-            }
-        }
-    }
-    func setupLocalVideo() {
-        agoraEngine?.enableVideo()
-        agoraEngine?.startPreview()
-        
-        let videoCanvas = AgoraRtcVideoCanvas()
-        videoCanvas.uid = 0
-        videoCanvas.renderMode = .hidden
-        videoCanvas.view = mainView.myVideoContainer.videoLayer
-        
-        
-        agoraEngine?.setupLocalVideo(videoCanvas)
-    }
+    
     override func loadView() {
         self.view = mainView
+        
+        
     }
-  
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         mainView.setDelegate(self)
-        initalizeAgoraEngine()
         
-//        Task {
-//            await joinChannel()
-//        }
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         
-        leaveChannel()
+        //        leaveChannel()
     }
     
     func requestPermission(type: AVMediaType,completion: @escaping(Bool) -> Void) {
@@ -90,8 +57,8 @@ class MeetingVC: BaseVC, ViewModelBindable {
             AVCaptureDevice.requestAccess(for: type, completionHandler: completion)
         }
     }
- 
- 
+    
+    
     
     func showMessage(title: String, text: String, delay: Int = 2) -> Void {
         let deadlineTime = DispatchTime.now() + .seconds(delay)
@@ -104,80 +71,92 @@ class MeetingVC: BaseVC, ViewModelBindable {
             })
         })
     }
-
-    func initalizeAgoraEngine() {
-        let config = AgoraRtcEngineConfig()
-        config.appId = appID
-        agoraEngine = AgoraRtcEngineKit.sharedEngine(with: config, delegate: nil)
-    }
     
-    func joinChannel() async {
+    //    func leaveChannel() {
+    //        agoraEngine?.leaveChannel(nil)
+    //        mainView.myVideoContainer
+    //        remoteUserIDs.removeAll()
+    //        mainView.collectionView.reloadData()
+    //    }
+    
+    
+    func apply(canvas: AgoraRtcVideoCanvas, toView view: UIView?, isLocal: Bool) {
+        if canvas.view == view { return }
         
-        let option = AgoraRtcChannelMediaOptions()
+        canvas.view = view
         
-        if self.userRole == .broadcaster {
-            option.clientRoleType = .broadcaster
+        if isLocal {
+            viewModel?.rtc.agoraKit.setupLocalVideo(canvas)
         } else {
-            option.clientRoleType = .audience
-        }
-        
-        option.channelProfile = .communication
-        
-        let resutl = agoraEngine?.joinChannel(byToken: tempToken, channelId: channelName, uid: 0, mediaOptions: option, joinSuccess: { channel, uid, elapsed in
-            
-        })
-        
-        if resutl == 0 {
-            joined = true
-            showMessage(title: "Success", text: "Successfully joined the channel as \(self.userRole)")
+            viewModel?.rtc.agoraKit.setupRemoteVideo(canvas)
         }
     }
     
-    func leaveChannel() {
-        agoraEngine?.leaveChannel(nil)
-        mainView.myVideoContainer
-        remoteUserIDs.removeAll()
-        mainView.collectionView.reloadData()
-    }
-    
-    
-    
-  
     func bindViewModel() {
         let input = MeetingViewModel.Input(viewDidLoad: rx.viewWillAppar.take(1).map { _ in ()})
         
-        let output = viewModel?.transform(input: input)
+        guard let output = viewModel?.transform(input: input) else { return }
         
-        output?.checkUserPermission
+        output.checkUserPermission
             .emit(to: rx.requestCameraAndMicPermission)
             .disposed(by: disposeBag)
         
-        output?.setUpLocalVideo
-            .do(onNext: { print("DEBUG: StartSetupLocalVideo") })
-            .emit(to: rx.setUpLocalVideo)
+        output.setupLocalVideo
+            .emit(onNext: { [weak self] _ in
+                guard let self = self,
+                      let canvas = self.viewModel?.rtc.createCanvas(uid: 0) else { return }
+                
+                self.apply(canvas: canvas, toView: self.mainView.myVideoContainer.videoLayer, isLocal: true)
+            })
             .disposed(by: disposeBag)
-        
-        output?.permissionDenied
+
+        output.alert
             .emit(to: rx.presentAlert)
             .disposed(by: disposeBag)
         
-        
-        agoraEngine?.rx.didJoinedOfUid()
-            .subscribe(onNext: {
-                print("DEBUG: didJoindOfUID = \($0)")
-                self.remoteUserIDs.append($0)
-                self.mainView.collectionView.reloadData()
-            })
-        
-        agoraEngine?.rx.didOfflineOfUid()
-            .subscribe(onNext: {
-                print("DEBUG: didOfflineOfUid = \($0)")
-                self.remoteUserIDs.append($0)
-                self.mainView.collectionView.reloadData()
-            })
-    }
+        output.localUser
+            .do(onNext: { print("DEBUG: localUserBind \($0)") })
+            .drive(mainView.myVideoContainer.rx.videoCallUser)
+                .disposed(by: disposeBag)
+                
+                
+                
+                //                            agoraEngine?.rx.didJoinedOfUid()
+                //                            .subscribe(onNext: {
+                //                                print("DEBUG: didJoindOfUID = \($0)")
+                //                                self.remoteUserIDs.append($0)
+                //                                self.mainView.collectionView.reloadData()
+                //                            })
+                //                            .disposed(by: disposeBag)
+                //
+                //                            agoraEngine?.rx.didOfflineOfUid()
+                //                            .subscribe(onNext: {
+                //                                print("DEBUG: didOfflineOfUid = \($0)")
+                //                                self.remoteUserIDs.remove(at: self.remoteUserIDs.firstIndex(of: $0) ?? 0)
+                //                                self.mainView.collectionView.reloadData()
+                //                            })
+                //                            .disposed(by: disposeBag)
+                //
+                //                            let volumeIndication = agoraEngine?.rx.reportAudioVolumeIndicationOfSpeakers()
+                //
+                //        volumeIndication?
+                //            .subscribe(onNext: { speakers in
+                //                for speaker in speakers {
+                //                    if speaker.uid == 0 {
+                //                        if speaker.vad == 1 {
+                //                            print("DEBUG: Speaking \(speaker)")
+                //                        } else {
+                //                            print("DEBUG: Don't Speaking \(speaker)")
+                //                        }
+                //
+                //                    } else {
+                //
+                //                    }
+                //                }
+                //            })
+                
+                }
     
- 
 }
 
 //extension MeetingVC: AgoraRtcEngineDelegate {
@@ -225,16 +204,7 @@ extension MeetingVC: UICollectionViewDataSource, UICollectionViewDelegateFlowLay
         videoCanvas.uid = remoteID
         videoCanvas.view = cell.groupCallContainer
         videoCanvas.renderMode = .fit
-        agoraEngine?.setupRemoteVideo(videoCanvas)
-        
-        
-        
-        if let userInfo = agoraEngine?.getUserInfo(byUid: remoteID, withError: nil),
-           let username = userInfo.userAccount {
-//            cell.nameLabel.text = username
-        } else {
-            
-        }
+        //        agoraEngine?.setupRemoteVideo(videoCanvas)
         
         return cell
     }
@@ -280,18 +250,42 @@ extension Reactive where Base: MeetingVC {
                 .subscribe(onNext: { result in
                     observer.observer.onNext(result)
                 }
-                , onCompleted: {
+                           , onCompleted: {
                     observer.observer.onCompleted()
                 })
                 .disposed(by: base.disposeBag)
         }
     }
     
-    var setUpLocalVideo: Binder<Void> {
-        return Binder(base) { base, _ in
-            base.setupLocalVideo()
+    //    var initAgoraEngine: Binder<String> {
+    //        return Binder(base) { base, appID in
+    //            let config = AgoraRtcEngineConfig()
+    //            config.appId = appID
+    //            base.agoraEngine = AgoraRtcEngineKit.sharedEngine(with: config, delegate: nil)
+    //            base.agoraEngine?.enableAudioVolumeIndication(300, smooth: 5, reportVad: true)
+    //        }
+    //    }
+    
+    
+    var joinChannel: Binder<ChannelInformation> {
+        return Binder(base) { base, channelInfo in
+            //            let option = AgoraRtcChannelMediaOptions()
+            //
+            //            if base.userRole == .broadcaster {
+            //                option.clientRoleType = .broadcaster
+            //            } else {
+            //                option.clientRoleType = .audience
+            //            }
+            //
+            //            option.channelProfile = .communication
+            //
+            //            let result = base.agoraEngine?.joinChannel(byToken: channelInfo.tempToken, channelId: channelInfo.channelName, uid: 0, mediaOptions: option) { channel, uid, elapsed in
+            //
+            //            }
+            //
+            //            if result == 0 {
+            //                base.showMessage(title: "Success", text: "Successfully joined the channel as \(base.userRole)")
+            //            }
         }
     }
 }
-
-
