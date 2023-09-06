@@ -47,19 +47,23 @@ final class MeetingViewModel: ViewModelType {
     private let disposeBag = DisposeBag()
     var coordinator: MeetingCoordinator?
     
-    let permissionrequest = PublishSubject<ResponseObserver>()
     let permissionresult = PublishSubject<Bool>()
-    let setUpLocalVideo = PublishSubject<Void>()
-    var alert = PublishSubject<Alert>()
     let permissionResultObserver = PublishSubject<Bool>()
-    
     let joinChannelTrigger = PublishSubject<Void>()
     let joinChannelStart = PublishSubject<ChannelInformation>()
+
+    // MARK: - Output
     
+    let permissionrequest = PublishSubject<ResponseObserver>()
+    let setUpLocalVideo = PublishSubject<Void>()
+    var alert = PublishSubject<Alert>()
     var remoteUsers = BehaviorSubject<[VideoCallUser]>(value: [])
     let localUser = BehaviorSubject<VideoCallUser>(value: VideoCallUser(uid: 0, displayName: ""))
     
-    let rtc = Rtc(appID: "e2f642e0bf04462fbcaf831501217b6a", channelId: "TEST5", token: "007eJxTYFh+QthF6fm6dbLvVk8zmpOWM+P8Do7L8zbr5+1b+FDdcOE8BYZUozQzE6NUg6Q0AxMTM6O0pOTENAtjQ1MDQyND8ySzxEn5X1MaAhkZGL3esgBJMATxWRlCXINDTBkYANMeIHw=", uid: 0)
+    let rtc = Rtc(appID: "e2f642e0bf04462fbcaf831501217b6a", channelId: "TEST7", token: "007eJxTYFhwZ0J8cF0PP4ct1+2OyrjIK+HvYnf/Sl/DznF79qcT6bcUGFKN0sxMjFINktIMTEzMjNKSkhPTLIwNTQ0MjQzNk8wS3/36ltIQyMjQEv6OkZEBAkF8VoYQ1+AQcwYGAM0MIZU=", uid: 0)
+    
+    // TODO: - Rtc에 이상한 channelId랑 token 넣어도 result가 0으로 나옴..
+//    let rtc = Rtc(appID: "e2f642e0bf04462fbcaf831501217b6a", channelId: "TEdf", token: "007eJxTYFhwZ0J8cF0PP4ct1+4123+HvYnf/SljNKSkhPTLIwNTQ0MjQzNk8wS3/36ltIQyMjQEv6OkZEBAkF8VoYQ1+AQcwYGAM0MIZU=", uid: 0)
     
     struct Input {
         let viewDidLoad: Observable<Void>
@@ -107,48 +111,46 @@ final class MeetingViewModel: ViewModelType {
             .bind(to: permissionresult)
             .disposed(by: disposeBag)
         
-        permissionresult
-            .withUnretained(self)
-            .subscribe(onNext: {
-                if $0.1 == true {
-                    $0.0.setUpLocalVideo.onNext(())
-                    $0.0.joinChannelTrigger.onNext(())
-                } else {
-                    let alert = Alert(title: "권한이 필요합니다", message: "마이크, 카메라 권한이필요합니다. 서버에 연결할 수 없습니다.")
-                    $0.0.alert.onNext(alert)
-                }
-            })
-            .disposed(by: disposeBag)
+//        permissionresult
+//            .withUnretained(self)
+//            .subscribe(onNext: {
+//                if $0.1 == true {
+//                    $0.0.setUpLocalVideo.onNext(())
+//                    $0.0.joinChannelTrigger.onNext(())
+//                } else {
+//                    let alert = Alert(title: "권한이 필요합니다", message: "마이크, 카메라 권한이필요합니다. 서버에 연결할 수 없습니다.")
+//                    $0.0.alert.onNext(alert)
+//                }
+//            })
+//            .disposed(by: disposeBag)
     }
     
     func transformJoinChannel(input: Input) {
-        joinChannelTrigger
-            .withUnretained(self)
-            .flatMap { (viewModel, _) in
-                viewModel.rtc.joinChannel()
-            }
-            .withUnretained(self)
-            .subscribe(onNext: { (viewModel, result) in
-                if result == true {
-                    let alert = Alert(title: "입장 성공", message: "그룹 채팅 채널에 입장하였습니다.")
-                    viewModel.alert.onNext(alert)
-                } else {
-                    let alert = Alert(title: "입장 실패", message: "입장에 실패했습니다.")
-                    viewModel.alert.onNext(alert)
-                }
-                
-            })
-            .disposed(by: disposeBag)
+//        joinChannelTrigger
+//            .withUnretained(self)
+//            .flatMap { (viewModel, _) in
+//                viewModel.rtc.joinChannel()
+//            }
+//            .withUnretained(self)
+//            .subscribe(onNext: { (viewModel, result) in
+//                print("DEBUG: JoinChannelResult \(result)")
+//                if result == true {
+//                    let alert = Alert(title: "입장 성공", message: "그룹 채팅 채널에 입장하였습니다.")
+//                    viewModel.alert.onNext(alert)
+//                } else {
+//                    let alert = Alert(title: "입장 실패", message: "입장에 실패했습니다.")
+//                    viewModel.alert.onNext(alert)
+//                }
+//            })
+//            .disposed(by: disposeBag)
     }
     
     // 내 정보 바인딩하고 내 마이크상태 연결하기
     func transformLocalUser() {
-        rtc.agoraKit.rx.didJoinedOfUid()
-            .subscribe(onNext: {
-                print("DEBUG: didJoinedOfUid\($0)")
-            })
-            .disposed(by: disposeBag)
-        
-        
+//        rtc.agoraKit.rx.didJoinedOfUid()
+//            .subscribe(onNext: {
+//                print("DEBUG: didJoinedOfUid\($0)")
+//            })
+//            .disposed(by: disposeBag)
     }
 }

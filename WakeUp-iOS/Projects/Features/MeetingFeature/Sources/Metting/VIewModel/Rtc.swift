@@ -33,13 +33,13 @@ class Rtc: NSObject {
         
         super.init()
 
-        let config = AgoraRtcEngineConfig()
-        config.appId = appID
-        agoraKit = .sharedEngine(withAppId: appID, delegate: nil)
-        agoraKit.enableAudioVolumeIndication(300, smooth: 5, reportVad: true)
-        
-        agoraKit.enableVideo()
-        agoraKit.startPreview()
+//        let config = AgoraRtcEngineConfig()
+//        config.appId = appID
+//        agoraKit = .sharedEngine(withAppId: appID, delegate: nil)
+//        agoraKit.enableAudioVolumeIndication(300, smooth: 5, reportVad: true)
+//        
+//        agoraKit.enableVideo()
+//        agoraKit.startPreview()
     }
     
     func joinChannel() -> Observable<Bool> {
@@ -55,11 +55,15 @@ class Rtc: NSObject {
                 return
             }
             
+            print("DEBUG: Result = \(result)")
+            
             if result == 0 {
                 emitter.onNext(true)
             } else {
                 emitter.onNext(false)
             }
+            
+            emitter.onCompleted()
             return Disposables.create()
         }
     }
