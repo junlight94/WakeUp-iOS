@@ -10,6 +10,8 @@ import UIKit
 import BaseFeatureDependency
 import Core
 
+import RxSwift
+
 public final class DefaultMeetingCoordinator: MeetingCoordinator {
     
     public var finishDelegate: CoordinatorFinishDelegate?
@@ -29,8 +31,16 @@ public final class DefaultMeetingCoordinator: MeetingCoordinator {
         let viewModel = MeetingViewModel()
         viewModel.coordinator = self
         
-        meetingVC.bind(to: viewModel)
+        viewModel.localUser.onNext(
+            VideoCallUser(
+                uid: 0,
+                displayName: "나",
+                isAudioMuted: false,
+                isVideoMuted: false,
+                isSpeaking: false)
+        )
         
+        meetingVC.bind(to: viewModel)
         
         self.navigationController.pushViewController(meetingVC, animated: true)
     }

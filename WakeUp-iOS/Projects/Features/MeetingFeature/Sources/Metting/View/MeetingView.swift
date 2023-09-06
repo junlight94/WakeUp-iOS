@@ -46,9 +46,10 @@ final class MeetingMainView: BaseFlexScrollableView {
         $0.register(MeetingCollectionViewCell.self, forCellWithReuseIdentifier: MeetingCollectionViewCell.identifier)
         $0.backgroundColor = .clear
     }
+    
+    let bottomBar = BottomBar()
         
-    func setDelegate<T: UIViewController>(_ viewController: T) where T: UICollectionViewDataSource & UICollectionViewDelegateFlowLayout {
-        self.collectionView.dataSource = viewController
+    func setDelegate<T: UIViewController>(_ viewController: T) where T: UICollectionViewDelegateFlowLayout {
         self.collectionView.delegate = viewController
     }
     
@@ -72,5 +73,21 @@ final class MeetingMainView: BaseFlexScrollableView {
                 flex.addItem().height(68).backgroundColor(.clear)
             }
         }
+        
+        rootFlexContainer.flex.direction(.column).justifyContent(.spaceBetween).define { flex in
+            flex.addItem(bottomBar).marginBottom(0).height(100).width(100%)
+        }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        rootFlexContainer.pin.all()
+        rootFlexContainer.flex.layout()
+        scrollView.pin.all()
+        contentView.pin.all()
+        
+        contentView.flex.layout()
+        scrollView.contentSize = contentView.frame.size
     }
 }
+

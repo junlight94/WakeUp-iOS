@@ -13,6 +13,9 @@ import DSKit
 
 import BaseFeatureDependency
 
+import RxSwift
+import RxCocoa
+
 enum UserClass {
     case local
     case remote
@@ -65,10 +68,16 @@ final class GroupVideoContainerView: BaseFlexView {
         super.init(frame: frame)
     }
     
-    
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(user: VideoCallUser) {
+        self.bringSubviewToFront(isTalkingBorderView)
+        self.nameLabel.text = user.displayName
+        self.offMicImageView.isHidden = !user.isAudioMuted
+        self.offCamImageView.isHidden = !user.isVideoMuted
+        self.isTalkingBorderView.layer.borderColor = user.isSpeaking ? UIColor.meetingColor.talkingBorderColor.cgColor : UIColor.meetingColor.backgrounColor.cgColor
     }
     
     override func layout() {
@@ -89,9 +98,15 @@ final class GroupVideoContainerView: BaseFlexView {
                     }
                     
                 }
-                
-                
             }
+        }
+    }
+}
+
+extension Reactive where Base: GroupVideoContainerView {
+    var videoCallUser: Binder<VideoCallUser> {
+        return Binder(base) { view, user in
+            view.configure(user: user)
         }
     }
 }

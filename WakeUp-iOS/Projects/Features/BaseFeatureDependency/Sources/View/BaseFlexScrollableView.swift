@@ -10,7 +10,7 @@ import FlexLayout
 import UIKit
 
 open class BaseFlexScrollableView: UIView {
-    let rootFlexContainer = UIView()
+    public let rootFlexContainer = UIView()
     public let scrollView = UIScrollView()
     
     public let contentView = UIView()
