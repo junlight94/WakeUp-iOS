@@ -101,11 +101,6 @@ final class GroupVideoContainerView: BaseFlexView {
             }
         }
     }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-    }
 }
 
 extension Reactive where Base: GroupVideoContainerView {

@@ -11,6 +11,9 @@ import DSKit
 import BaseFeatureDependency
 import FlexLayout
 
+import RxSwift
+import RxCocoa
+
 final class BottomBar: BaseFlexView {
     let exitButton = Button_General().then {
         $0.setButton(text: "나가기", typo: .medium, size: 14)
@@ -48,5 +51,14 @@ final class BottomBar: BaseFlexView {
         self.backgroundColor = .white
         self.layer.cornerRadius = 16
         self.clipsToBounds = true
+    }
+}
+
+extension Reactive where Base: BottomBar {
+    var bottomBar: Binder<VideoCallUser> {
+        return Binder(base) { view, user in
+            view.audioButton.isOn = !user.isAudioMuted
+            view.videoButton.isOn = !user.isVideoMuted
+        }
     }
 }

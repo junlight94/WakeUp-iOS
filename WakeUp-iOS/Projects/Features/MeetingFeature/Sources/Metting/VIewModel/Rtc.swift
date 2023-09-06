@@ -15,10 +15,10 @@ class Rtc: NSObject {
     
     var agoraKit: AgoraRtcEngineKit!
     
-    let appID: String
-    let channelId: String
-    let token: String
-    let uid: UInt
+    private let appID: String
+    private let channelId: String
+    private let token: String
+    private let uid: UInt
     
     init(
         appID: String,
@@ -33,13 +33,13 @@ class Rtc: NSObject {
         
         super.init()
 
-//        let config = AgoraRtcEngineConfig()
-//        config.appId = appID
-//        agoraKit = .sharedEngine(withAppId: appID, delegate: nil)
-//        agoraKit.enableAudioVolumeIndication(300, smooth: 5, reportVad: true)
-//        
-//        agoraKit.enableVideo()
-//        agoraKit.startPreview()
+        let config = AgoraRtcEngineConfig()
+        config.appId = appID
+        agoraKit = .sharedEngine(withAppId: appID, delegate: nil)
+        agoraKit.enableAudioVolumeIndication(300, smooth: 5, reportVad: true)
+        
+        agoraKit.enableVideo()
+        agoraKit.startPreview()
     }
     
     func joinChannel() -> Observable<Bool> {
@@ -74,6 +74,10 @@ class Rtc: NSObject {
         canvas.renderMode = .hidden
         
         return canvas
+    }
+    
+    func leaveChannel() {
+        agoraKit.leaveChannel(nil)
     }
 }
 

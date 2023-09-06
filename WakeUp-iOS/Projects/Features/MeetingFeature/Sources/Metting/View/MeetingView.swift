@@ -47,10 +47,9 @@ final class MeetingMainView: BaseFlexScrollableView {
         $0.backgroundColor = .clear
     }
     
-    lazy var bottomBar = BottomBar()
+    let bottomBar = BottomBar()
         
-    func setDelegate<T: UIViewController>(_ viewController: T) where T: UICollectionViewDataSource & UICollectionViewDelegateFlowLayout {
-        self.collectionView.dataSource = viewController
+    func setDelegate<T: UIViewController>(_ viewController: T) where T: UICollectionViewDelegateFlowLayout {
         self.collectionView.delegate = viewController
     }
     

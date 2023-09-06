@@ -19,7 +19,7 @@ import Core
 
 final class MeetingCollectionViewCell: UICollectionViewCell, Identifiable {
     
-    let groupCallContainer = GroupVideoContainerView(userClass: .remote)
+    let videoContainer = GroupVideoContainerView(userClass: .remote)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -33,9 +33,9 @@ final class MeetingCollectionViewCell: UICollectionViewCell, Identifiable {
     
     func layout() {
         
-        contentView.addSubview(groupCallContainer)
+        contentView.addSubview(videoContainer)
         
-        groupCallContainer.flex.define { flex in
+        videoContainer.flex.define { flex in
             
         }
     }
@@ -43,6 +43,10 @@ final class MeetingCollectionViewCell: UICollectionViewCell, Identifiable {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        groupCallContainer.pin.all()
+        videoContainer.pin.all()
+    }
+    
+    func configure(_ user: VideoCallUser) {
+        videoContainer.configure(user: user)
     }
 }

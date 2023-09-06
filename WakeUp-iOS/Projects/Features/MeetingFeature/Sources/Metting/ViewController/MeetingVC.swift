@@ -72,14 +72,6 @@ class MeetingVC: BaseVC, ViewModelBindable {
         })
     }
     
-    //    func leaveChannel() {
-    //        agoraEngine?.leaveChannel(nil)
-    //        mainView.myVideoContainer
-    //        remoteUserIDs.removeAll()
-    //        mainView.collectionView.reloadData()
-    //    }
-    
-    
     func apply(canvas: AgoraRtcVideoCanvas, toView view: UIView?, isLocal: Bool) {
         if canvas.view == view { return }
         
@@ -93,15 +85,38 @@ class MeetingVC: BaseVC, ViewModelBindable {
     }
     
     func bindViewModel() {
-        let input = MeetingViewModel.Input(viewDidLoad: rx.viewWillAppar.take(1).map { _ in ()})
+        let input = MeetingViewModel.Input(
+            viewDidLoad: rx.viewWillAppar.take(1).map { _ in () },
+            localUserAudioTapped: mainView.bottomBar.audioButton.rx.tap.asObservable(),
+            localUserVideoTapped: mainView.bottomBar.videoButton.rx.tap.asObservable(),
+            viewDidDisappear: rx.viewDidDisApplear.map { _ in () }.asObservable()
+        )
         
         guard let output = viewModel?.transform(input: input) else { return }
         
-        output.checkUserPermission
+        bindLocalUser(input: output)
+        bindAlert(input: output)
+        bindPermission(input: output)
+        bindRemoteuser(input: output)
+    }
+    
+    func bindAlert(input: MeetingViewModel.Output) {
+        
+        input.alert
+            .emit(to: rx.presentAlert)
+            .disposed(by: disposeBag)
+    }
+    
+    func bindPermission(input: MeetingViewModel.Output) {
+        
+        input.checkUserPermission
             .emit(to: rx.requestCameraAndMicPermission)
             .disposed(by: disposeBag)
+    }
+    
+    func bindLocalUser(input: MeetingViewModel.Output) {
         
-        output.setupLocalVideo
+        input.setupLocalVideo
             .emit(onNext: { [weak self] _ in
                 guard let self = self,
                       let canvas = self.viewModel?.rtc.createCanvas(uid: 0) else { return }
@@ -109,105 +124,38 @@ class MeetingVC: BaseVC, ViewModelBindable {
                 self.apply(canvas: canvas, toView: self.mainView.myVideoContainer.videoLayer, isLocal: true)
             })
             .disposed(by: disposeBag)
-
-        output.alert
-            .emit(to: rx.presentAlert)
-            .disposed(by: disposeBag)
         
-        output.localUser
+        input.localUser
             .do(onNext: { print("DEBUG: localUserBind \($0)") })
             .drive(mainView.myVideoContainer.rx.videoCallUser)
-                .disposed(by: disposeBag)
-                
-                
-                
-                //                            agoraEngine?.rx.didJoinedOfUid()
-                //                            .subscribe(onNext: {
-                //                                print("DEBUG: didJoindOfUID = \($0)")
-                //                                self.remoteUserIDs.append($0)
-                //                                self.mainView.collectionView.reloadData()
-                //                            })
-                //                            .disposed(by: disposeBag)
-                //
-                //                            agoraEngine?.rx.didOfflineOfUid()
-                //                            .subscribe(onNext: {
-                //                                print("DEBUG: didOfflineOfUid = \($0)")
-                //                                self.remoteUserIDs.remove(at: self.remoteUserIDs.firstIndex(of: $0) ?? 0)
-                //                                self.mainView.collectionView.reloadData()
-                //                            })
-                //                            .disposed(by: disposeBag)
-                //
-                //                            let volumeIndication = agoraEngine?.rx.reportAudioVolumeIndicationOfSpeakers()
-                //
-                //        volumeIndication?
-                //            .subscribe(onNext: { speakers in
-                //                for speaker in speakers {
-                //                    if speaker.uid == 0 {
-                //                        if speaker.vad == 1 {
-                //                            print("DEBUG: Speaking \(speaker)")
-                //                        } else {
-                //                            print("DEBUG: Don't Speaking \(speaker)")
-                //                        }
-                //
-                //                    } else {
-                //
-                //                    }
-                //                }
-                //            })
-                
-                }
+            .disposed(by: disposeBag)
+        
+        input.localUser
+            .drive(mainView.bottomBar.rx.bottomBar)
+            .disposed(by: disposeBag)
+    }
     
+    func bindRemoteuser(input: MeetingViewModel.Output) {
+        input.remoteUsers
+            .drive(mainView.collectionView.rx.items) { [weak self] collectionView, index, user in
+                guard let self = self,
+                      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MeetingCollectionViewCell.identifier, for: IndexPath(row: index, section: 0)) as? MeetingCollectionViewCell else { return UICollectionViewCell()
+                }
+                
+                let remoteID = user.uid
+                if let videoCanvas = self.viewModel?.rtc.createCanvas(uid: remoteID) {
+                    self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
+                }
+                
+                cell.configure(user)
+                
+                return cell
+            }
+            .disposed(by: disposeBag)
+    }
 }
 
-//extension MeetingVC: AgoraRtcEngineDelegate {
-//    // 새로운 참여자가 채널에 참여할 때 호출
-//
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
-//        remoteUserIDs.append(uid)
-//        mainView.collectionView.reloadData()
-//    }
-//
-//    // 사용자가 채널을 떠날 때 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
-//        if let index = remoteUserIDs.firstIndex(where: { $0 == uid }) {
-//            remoteUserIDs.remove(at: index)
-//            mainView.collectionView.reloadData()
-//        }
-//    }
-//
-//    // 누군가 Audio를 Mute하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioMuted muted: Bool, byUid uid: UInt) {
-//
-//    }
-//
-//    // 누군가 Video의 상태를 변경하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStateChangedOfUid uid: UInt, state: AgoraVideoRemoteState, reason: AgoraVideoRemoteReason, elapsed: Int) {
-//
-//    }
-//
-//    // 누군가 말을 하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, activeSpeaker speakerUid: UInt) {
-//
-//    }
-//}
-
-extension MeetingVC: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return remoteUserIDs.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MeetingCollectionViewCell.identifier, for: indexPath) as? MeetingCollectionViewCell else { return UICollectionViewCell() }
-        
-        let remoteID = remoteUserIDs[indexPath.row]
-        let videoCanvas = AgoraRtcVideoCanvas()
-        videoCanvas.uid = remoteID
-        videoCanvas.view = cell.groupCallContainer
-        videoCanvas.renderMode = .fit
-//                agoraEngine?.setupRemoteVideo(videoCanvas)
-        
-        return cell
-    }
+extension MeetingVC: UICollectionViewDelegateFlowLayout{
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
@@ -217,6 +165,7 @@ extension MeetingVC: UICollectionViewDataSource, UICollectionViewDelegateFlowLay
         return CGSize(width: itemSize, height: itemSize)
     }
 }
+
 
 struct ResponseObserver {
     let observer: AnyObserver<Bool>
@@ -256,36 +205,36 @@ extension Reactive where Base: MeetingVC {
                 .disposed(by: base.disposeBag)
         }
     }
-    
-    //    var initAgoraEngine: Binder<String> {
-    //        return Binder(base) { base, appID in
-    //            let config = AgoraRtcEngineConfig()
-    //            config.appId = appID
-    //            base.agoraEngine = AgoraRtcEngineKit.sharedEngine(with: config, delegate: nil)
-    //            base.agoraEngine?.enableAudioVolumeIndication(300, smooth: 5, reportVad: true)
-    //        }
-    //    }
-    
-    
-    var joinChannel: Binder<ChannelInformation> {
-        return Binder(base) { base, channelInfo in
-            //            let option = AgoraRtcChannelMediaOptions()
-            //
-            //            if base.userRole == .broadcaster {
-            //                option.clientRoleType = .broadcaster
-            //            } else {
-            //                option.clientRoleType = .audience
-            //            }
-            //
-            //            option.channelProfile = .communication
-            //
-            //            let result = base.agoraEngine?.joinChannel(byToken: channelInfo.tempToken, channelId: channelInfo.channelName, uid: 0, mediaOptions: option) { channel, uid, elapsed in
-            //
-            //            }
-            //
-            //            if result == 0 {
-            //                base.showMessage(title: "Success", text: "Successfully joined the channel as \(base.userRole)")
-            //            }
-        }
-    }
 }
+
+//extension MeetingVC: AgoraRtcEngineDelegate {
+//    // 새로운 참여자가 채널에 참여할 때 호출
+//
+//    func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
+//        remoteUserIDs.append(uid)
+//        mainView.collectionView.reloadData()
+//    }
+//
+//    // 사용자가 채널을 떠날 때 호출
+//    func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
+//        if let index = remoteUserIDs.firstIndex(where: { $0 == uid }) {
+//            remoteUserIDs.remove(at: index)
+//            mainView.collectionView.reloadData()
+//        }
+//    }
+//
+//    // 누군가 Audio를 Mute하면 호출
+//    func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioMuted muted: Bool, byUid uid: UInt) {
+//
+//    }
+//
+//    // 누군가 Video의 상태를 변경하면 호출
+//    func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStateChangedOfUid uid: UInt, state: AgoraVideoRemoteState, reason: AgoraVideoRemoteReason, elapsed: Int) {
+//
+//    }
+//
+//    // 누군가 말을 하면 호출
+//    func rtcEngine(_ engine: AgoraRtcEngineKit, activeSpeaker speakerUid: UInt) {
+//
+//    }
+//}
