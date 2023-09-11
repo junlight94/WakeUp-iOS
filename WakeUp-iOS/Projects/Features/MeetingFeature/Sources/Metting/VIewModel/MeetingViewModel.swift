@@ -60,7 +60,7 @@ final class MeetingViewModel: ViewModelType {
     let localUser = BehaviorSubject<VideoCallUser>(value: VideoCallUser(uid: 0, displayName: ""))
     var remoteUsers = BehaviorSubject<[VideoCallUser]>(value: [])
     
-    let rtc = Rtc(appID: "e2f642e0bf04462fbcaf831501217b6a", channelId: "TEST7", token: "007eJxTYFhwZ0J8cF0PP4ct1+2OyrjIK+HvYnf/Sl/DznF79qcT6bcUGFKN0sxMjFINktIMTEzMjNKSkhPTLIwNTQ0MjQzNk8wS3/36ltIQyMjQEv6OkZEBAkF8VoYQ1+AQcwYGAM0MIZU=", uid: 0)
+    let rtc = Rtc(appID: "e2f642e0bf04462fbcaf831501217b6a", channelId: "TEST", token: "007eJxTYHh1z/zgo9NKGq6mGxl/P57Empq78kveJ+ucyx0K5W6vQmUVGFKN0sxMjFINktIMTEzMjNKSkhPTLIwNTQ0MjQzNk8wSL/j+SGkIZGQ4dcyXgREKQXwWhhDX4BAGBgCxsCCS", uid: 0)
     
     // TODO: - Rtc에 이상한 channelId랑 token 넣어도 result가 0으로 나옴..
 //    let rtc = Rtc(appID: "e2f642e0bf04462fbcaf831501217b6a", channelId: "TEdf", token: "007eJxTYFhwZ0J8cF0PP4ct1+4123+HvYnf/SljNKSkhPTLIwNTQ0MjQzNk8wS3/36ltIQyMjQEv6OkZEBAkF8VoYQ1+AQcwYGAM0MIZU=", uid: 0)
@@ -72,6 +72,7 @@ final class MeetingViewModel: ViewModelType {
         let localUserAudioTapped: Observable<Void>
         let localUserVideoTapped: Observable<Void>
         let viewDidDisappear: Observable<Void>
+        let leaveButtonTapped: Observable<Void>
     }
     
     // MARK: - ViewModelOutput
@@ -159,6 +160,15 @@ final class MeetingViewModel: ViewModelType {
             .viewDidDisappear
             .withUnretained(self)
             .subscribe(onNext: { viewModel, _ in
+                print("DEBUG: LeaveChannel@@@@@@")
+                viewModel.rtc.leaveChannel()
+            })
+            .disposed(by: disposeBag)
+        
+        input.leaveButtonTapped
+            .withUnretained(self)
+            .subscribe(onNext: { viewModel, _ in
+                print("DEBUG: LeaveChannel@@@@@@")
                 viewModel.rtc.leaveChannel()
             })
             .disposed(by: disposeBag)
@@ -227,7 +237,7 @@ final class MeetingViewModel: ViewModelType {
             .withUnretained(self)
             .subscribe(onNext: { viewModel, combine in
                 let offlineUserUid = combine.0
-            
+                
                 var remoteUsers = combine.1
                 
                 if let offlineUserIndex = remoteUsers.firstIndex(where: { $0.uid == offlineUserUid}) {
@@ -237,6 +247,94 @@ final class MeetingViewModel: ViewModelType {
                 viewModel.remoteUsers.onNext(remoteUsers)
             })
             .disposed(by: disposeBag)
+        
+        let audioMuteChanged = rtc.agoraKit.rx.delegate.didAudioMutedSubject
+            
+        audioMuteChanged
+            .withLatestFrom(
+                Observable.combineLatest(audioMuteChanged, remoteUsers)
+            )
+            .withUnretained(self)
+            .subscribe(onNext: { viewModel, combine in
+                let audioChangedUserUid = combine.0.uid
+                let audioChangedValue = combine.0.muted
+                
+                var remoteUsers = combine.1
+                
+                if let changedUserIndex = remoteUsers.firstIndex(where: { $0.uid == audioChangedUserUid }) {
+                    remoteUsers[changedUserIndex].isAudioMuted = audioChangedValue
+                    
+                    if audioChangedValue == true {
+                        remoteUsers[changedUserIndex].isSpeaking = false
+                    }
+                }
+                
+                viewModel.remoteUsers.onNext(remoteUsers)
+            })
+            .disposed(by: disposeBag)
+        
+        let videoEnableChanged = rtc.agoraKit.rx.delegate.didVideoEnabledSubject
+            
+        videoEnableChanged
+            .withLatestFrom(
+                Observable.combineLatest(videoEnableChanged, remoteUsers)
+            )
+            .withUnretained(self)
+            .subscribe(onNext: { viewModel, combine in
+                let videoChangedUserUid = combine.0.uid
+                let videoChangedValue = combine.0.enabled
+                
+                var remoteUsers = combine.1
+                
+                if let changedUserIndex = remoteUsers.firstIndex(where: { $0.uid == videoChangedUserUid }) {
+                    remoteUsers[changedUserIndex].isVideoMuted = videoChangedValue
+                }
+                
+                viewModel.remoteUsers.onNext(remoteUsers)
+            })
+            .disposed(by: disposeBag)
+        
+        
+        let speaking = rtc.agoraKit.rx.reportAudioVolumeIndicationOfSpeakers()
+            .map { $0.sorted(by: { $0.uid < $1.uid }) }
+
+        let localUserSpeaking = speaking
+            .map {
+                return $0.filter { $0.uid == 0 }
+            }
+            .map { $0.first }
+            .compactMap { $0 }
+            .map { return [$0.uid, $0.vad] }
+            .distinctUntilChanged()
+        
+        let remoteUser = speaking
+            .map { users in
+                let lastIndex = users.count - 1
+                
+                return users[1...lastIndex]
+            }
+        
+        localUserSpeaking
+            .withLatestFrom(
+                Observable.combineLatest(localUserSpeaking, localUser)
+            )
+            .withUnretained(self)
+            .subscribe(onNext: { viewModel, combine in
+                let speakingUserUid = combine.0[0]
+                let speakingUserValue = combine.0[1] == 0 ? false : true
+
+                var localUserData = combine.1
+
+                localUserData.isSpeaking = speakingUserValue
+
+                print(localUserData)
+
+                viewModel.localUser.onNext(localUserData)
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    func transformSpeaking() {
         
     }
 }

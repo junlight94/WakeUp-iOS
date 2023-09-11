@@ -87,9 +87,14 @@ class MeetingVC: BaseVC, ViewModelBindable {
     func bindViewModel() {
         let input = MeetingViewModel.Input(
             viewDidLoad: rx.viewWillAppar.take(1).map { _ in () },
-            localUserAudioTapped: mainView.bottomBar.audioButton.rx.tap.asObservable(),
-            localUserVideoTapped: mainView.bottomBar.videoButton.rx.tap.asObservable(),
-            viewDidDisappear: rx.viewDidDisApplear.map { _ in () }.asObservable()
+            localUserAudioTapped: mainView.bottomBar.audioButton.rx.tap
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance),
+            localUserVideoTapped: mainView.bottomBar.videoButton.rx.tap
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance),
+            viewDidDisappear: rx.viewDidDisApplear.map { _ in () }
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance),
+            leaveButtonTapped: mainView.bottomBar.leaveButton.rx.tap
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance)
         )
         
         guard let output = viewModel?.transform(input: input) else { return }
@@ -152,6 +157,11 @@ class MeetingVC: BaseVC, ViewModelBindable {
                 return cell
             }
             .disposed(by: disposeBag)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        mainView.myVideoContainer.bringComponentoToFront()
     }
 }
 

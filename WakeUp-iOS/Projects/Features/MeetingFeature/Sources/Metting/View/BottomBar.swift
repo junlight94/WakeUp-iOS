@@ -15,7 +15,7 @@ import RxSwift
 import RxCocoa
 
 final class BottomBar: BaseFlexView {
-    let exitButton = Button_General().then {
+    let leaveButton = Button_General().then {
         $0.setButton(text: "나가기", typo: .medium, size: 14)
     }
     
@@ -37,7 +37,7 @@ final class BottomBar: BaseFlexView {
         
         rootFlexContainer.flex.direction(.row).justifyContent(.spaceBetween).alignItems(.center).define { flex in
             
-            flex.addItem(exitButton).marginLeft(24).width(63).height(29)
+            flex.addItem(leaveButton).marginLeft(24).width(63).height(29)
             
             
             flex.addItem().direction(.row).marginRight(24).define { flex in

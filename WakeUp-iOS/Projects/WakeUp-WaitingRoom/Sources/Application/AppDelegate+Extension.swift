@@ -8,7 +8,6 @@
 import Foundation
 import Domain
 import Network
-import Data
 import Core
 
 extension AppDelegate {

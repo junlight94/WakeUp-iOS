@@ -9,8 +9,10 @@
 import UIKit
 import BaseFeatureDependency
 import Core
-
+import Data
 import RxSwift
+
+import AgoraRtcKit
 
 public final class DefaultMeetingCoordinator: MeetingCoordinator {
     
@@ -30,6 +32,9 @@ public final class DefaultMeetingCoordinator: MeetingCoordinator {
         let meetingVC = MeetingVC()
         let viewModel = MeetingViewModel()
         viewModel.coordinator = self
+        
+        AgoraRtcService.shared.setup(appID: "", channelID: "", token: "", uid: 0, clientRole: .broadcaster)
+        
         
         viewModel.localUser.onNext(
             VideoCallUser(
