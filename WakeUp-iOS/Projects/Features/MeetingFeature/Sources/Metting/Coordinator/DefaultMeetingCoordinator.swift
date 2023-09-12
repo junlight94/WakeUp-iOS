@@ -7,9 +7,10 @@
 //
 
 import UIKit
-import BaseFeatureDependency
 import Core
-import Data
+import Domain
+
+import BaseFeatureDependency
 import RxSwift
 
 import AgoraRtcKit
@@ -33,16 +34,8 @@ public final class DefaultMeetingCoordinator: MeetingCoordinator {
         let viewModel = MeetingViewModel()
         viewModel.coordinator = self
         
-        AgoraRtcService.shared.setup(appID: "", channelID: "", token: "", uid: 0, clientRole: .broadcaster)
-        
-        
         viewModel.localUser.onNext(
-            VideoCallUser(
-                uid: 0,
-                displayName: "나",
-                isAudioMuted: false,
-                isVideoMuted: false,
-                isSpeaking: false)
+            VideoCallUser(uid: 0)
         )
         
         meetingVC.bind(to: viewModel)

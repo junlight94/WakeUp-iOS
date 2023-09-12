@@ -8,12 +8,20 @@
 
 import RxSwift
 import Foundation
-import Data
 
-public struct JoinVideoCallUseCase {
-    private let agaraRepository: AgoraRepository
+public protocol JoinVideoCallUseCaseProtocol {
+    func joinChannel() -> Observable<Bool>
+}
+
+public struct JoinVideoCallUseCase: JoinVideoCallUseCaseProtocol {
     
-    func joinChannel() -> Single<Bool> {
-        return agaraRepository.joinChannel()
+    private let agoraRepository: AgoraRepositoryProtocol
+    
+    public init(agoraRepository: AgoraRepositoryProtocol) {
+        self.agoraRepository = agoraRepository
+    }
+    
+    public func joinChannel() -> Observable<Bool> {
+        return agoraRepository.joinChannel()
     }
 }

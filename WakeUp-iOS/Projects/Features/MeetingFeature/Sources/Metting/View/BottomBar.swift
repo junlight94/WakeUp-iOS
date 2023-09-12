@@ -14,6 +14,8 @@ import FlexLayout
 import RxSwift
 import RxCocoa
 
+import Domain
+
 final class BottomBar: BaseFlexView {
     let leaveButton = Button_General().then {
         $0.setButton(text: "나가기", typo: .medium, size: 14)

@@ -7,21 +7,74 @@
 
 import Foundation
 import Domain
-import Network
+import Data
+import BaseFeatureDependency
+import AgoraRtcKit
 import Core
 
 extension AppDelegate {
     var container: DIContainer {
         DIContainer.shared
     }
+    
+    func registerAgoraService(
+        appID: String,
+        channelID: String,
+        token: String,
+        uid: UInt,
+        clientRole: AgoraClientRole
+    ) {
+        container.register(interface: AgoraRtcServiceProtocol.self, implement: { _ in
+            AgoraRtcService.shared.setup(
+                appID: appID,
+                channelID: channelID,
+                token: token, uid: uid,
+                clientRole: clientRole
+            )
+            
+            return AgoraRtcService.shared
+        })
+    }
+    
+    func registerAgoraUIInterface() {
+
+    }
 
     func registerDependencies() {
 
-        // MARK: - Repository
-//        container.register(interface: APIManager.self) { _ in DefaultAPIManager() }
+//         MARK: - Repository
+        container.register(interface: AgoraRepositoryProtocol.self) { resolver in
+            guard let agoraService = resolver.resolve(AgoraRtcServiceProtocol.self) else {
+                fatalError()
+            }
+            
+            return AgoraRepository(
+                agoraService: agoraService
+            )
+        }
 
         // MARK: - UseCase
-//        container.register(interface: SplashUseCase.self) { _ in Splash() }
+        container.register(interface: JoinVideoCallUseCaseProtocol.self) { resolver in
+            
+            guard let agoraRepository = resolver.resolve(AgoraRepositoryProtocol.self) else {
+                fatalError()
+            }
+            
+            return JoinVideoCallUseCase(
+                agoraRepository: agoraRepository
+            )
+        }
+        
+        container.register(interface: VideoCallUseCaseProtocol.self, implement: { resolver in
+            
+            guard let agoraRepository = resolver.resolve(AgoraRepositoryProtocol.self) else {
+                fatalError()
+            }
+            
+            return VideoCallUseCase(
+                agoraRepository: agoraRepository
+            )
+        })
     }
 }
 

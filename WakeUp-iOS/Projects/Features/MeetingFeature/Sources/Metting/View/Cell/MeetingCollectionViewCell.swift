@@ -15,6 +15,7 @@ import PinLayout
 import DSKit
 
 import Core
+import Domain
 
 
 final class MeetingCollectionViewCell: UICollectionViewCell, Identifiable {

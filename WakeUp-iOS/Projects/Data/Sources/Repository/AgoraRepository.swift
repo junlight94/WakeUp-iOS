@@ -8,16 +8,35 @@
 
 import RxSwift
 import Foundation
+import Domain
 
-public class AgoraRepository: NSObject {
-    private let agoraService: AgoraRtcService
+public struct AgoraRepository: AgoraRepositoryProtocol {
     
-    public func joinChannel() -> Single<Bool> {
+    private let agoraService: AgoraRtcServiceProtocol
+    
+    public init(agoraService: AgoraRtcServiceProtocol) {
+        self.agoraService = agoraService
+    }
+    
+    public func joinChannel() -> Observable<Bool> {
         return agoraService.joinChannel()
     }
     
-    init(agoraService: AgoraRtcService) {
-        self.agoraService = agoraService
-        super.init()
+    public func observeDidJoinOfUser() -> Observable<VideoCallUser> {
+        return agoraService.agoraKit.rx.didJoinedOfUid()
+            .map { uid in
+                let newUser = VideoCallUser(uid: uid)
+                
+                return newUser
+            }
+            .compactMap { $0 }
+    }
+    
+    public func observeDidOfflineOfUid() -> Observable<UInt> {
+        return agoraService.agoraKit.rx.didOfflineOfUid()
+    }
+    
+    public func observeDidUserAudioMuteChanged() -> Observable<(muted: Bool, uid: UInt)> {
+        return agoraService.agoraKit.rx.delegate.didAudioMutedSubject
     }
 }

@@ -21,12 +21,11 @@ import RxSwift
 import RxCocoa
 
 
-
-class MeetingVC: BaseVC, ViewModelBindable {
+final class MeetingVC: BaseVC, ViewModelBindable {
     
-    let baseflexContainer = BaseFlexScrollableView(mode: .adjustHeight)
+    let baseflexContainer = BaseFlexScrollableView()
     
-    let mainView = MeetingMainView(mode: .adjustHeight)
+    let mainView = MeetingMainView()
     
     var viewModel: MeetingViewModel?
     let disposeBag = DisposeBag()
@@ -58,8 +57,6 @@ class MeetingVC: BaseVC, ViewModelBindable {
         }
     }
     
-    
-    
     func showMessage(title: String, text: String, delay: Int = 2) -> Void {
         let deadlineTime = DispatchTime.now() + .seconds(delay)
         DispatchQueue.main.asyncAfter(deadline: deadlineTime, execute: {
@@ -78,9 +75,9 @@ class MeetingVC: BaseVC, ViewModelBindable {
         canvas.view = view
         
         if isLocal {
-            viewModel?.rtc.agoraKit.setupLocalVideo(canvas)
+            AgoraRtcService.shared.agoraKit.setupLocalVideo(canvas)
         } else {
-            viewModel?.rtc.agoraKit.setupRemoteVideo(canvas)
+            AgoraRtcService.shared.agoraKit.setupRemoteVideo(canvas)
         }
     }
     
@@ -123,12 +120,14 @@ class MeetingVC: BaseVC, ViewModelBindable {
         
         input.setupLocalVideo
             .emit(onNext: { [weak self] _ in
-                guard let self = self,
-                      let canvas = self.viewModel?.rtc.createCanvas(uid: 0) else { return }
+                guard let self = self else { return }
+                
+                let canvas = AgoraRtcService.shared.createCanvas(uid: 0)
                 
                 self.apply(canvas: canvas, toView: self.mainView.myVideoContainer.videoLayer, isLocal: true)
             })
             .disposed(by: disposeBag)
+        
         
         input.localUser
             .do(onNext: { print("DEBUG: localUserBind \($0)") })
@@ -144,13 +143,20 @@ class MeetingVC: BaseVC, ViewModelBindable {
         input.remoteUsers
             .drive(mainView.collectionView.rx.items) { [weak self] collectionView, index, user in
                 guard let self = self,
-                      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MeetingCollectionViewCell.identifier, for: IndexPath(row: index, section: 0)) as? MeetingCollectionViewCell else { return UICollectionViewCell()
-                }
+                      let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: MeetingCollectionViewCell.identifier,
+                        for: IndexPath(row: index, section: 0)
+                      ) as? MeetingCollectionViewCell else { return UICollectionViewCell() }
                 
                 let remoteID = user.uid
-                if let videoCanvas = self.viewModel?.rtc.createCanvas(uid: remoteID) {
+                
+                if let videoCanvas = AgoraRtcService.shared.agoraKit.createCanvas(uid: remoteID) {
                     self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
                 }
+                
+//                if let videoCanvas = self.viewModel?.rtc.createCanvas(uid: remoteID) {
+//                    self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
+//                }
                 
                 cell.configure(user)
                 
@@ -216,35 +222,3 @@ extension Reactive where Base: MeetingVC {
         }
     }
 }
-
-//extension MeetingVC: AgoraRtcEngineDelegate {
-//    // 새로운 참여자가 채널에 참여할 때 호출
-//
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
-//        remoteUserIDs.append(uid)
-//        mainView.collectionView.reloadData()
-//    }
-//
-//    // 사용자가 채널을 떠날 때 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
-//        if let index = remoteUserIDs.firstIndex(where: { $0 == uid }) {
-//            remoteUserIDs.remove(at: index)
-//            mainView.collectionView.reloadData()
-//        }
-//    }
-//
-//    // 누군가 Audio를 Mute하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioMuted muted: Bool, byUid uid: UInt) {
-//
-//    }
-//
-//    // 누군가 Video의 상태를 변경하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStateChangedOfUid uid: UInt, state: AgoraVideoRemoteState, reason: AgoraVideoRemoteReason, elapsed: Int) {
-//
-//    }
-//
-//    // 누군가 말을 하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, activeSpeaker speakerUid: UInt) {
-//
-//    }
-//}

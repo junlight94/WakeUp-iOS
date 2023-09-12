@@ -9,12 +9,13 @@
 import Foundation
 import AgoraRtcKit
 import RxSwift
+import Domain
 
 public enum AgoraRtcError: Error {
     case joinChannel
 }
 
-public class AgoraRtcService: NSObject {
+public class AgoraRtcService: AgoraRtcServiceProtocol {
     
     public static let shared = AgoraRtcService()
     
@@ -24,9 +25,11 @@ public class AgoraRtcService: NSObject {
     private var uid: UInt!
     private var role: AgoraClientRole!
     
-    var agoraKit: AgoraRtcEngineKit?
+    public var agoraKit: AgoraRtcEngineKit
     
-    private override init() { super.init() }
+    private init() {
+        self.agoraKit = AgoraRtcEngineKit()
+    }
     
     /// configure method
     public func setup(
@@ -46,46 +49,41 @@ public class AgoraRtcService: NSObject {
         config.appId = appID
         
         agoraKit = .sharedEngine(withAppId: appID, delegate: nil)
-        agoraKit?.enableAudioVolumeIndication(300, smooth: 3, reportVad: true)
+        agoraKit.enableAudioVolumeIndication(300, smooth: 3, reportVad: true)
         
-        agoraKit?.enableVideo()
-        agoraKit?.startPreview()
+        agoraKit.enableVideo()
+        agoraKit.startPreview()
     }
     
-    public func joinChannel() -> Single<Bool> {
-        return Single<Bool>.create { [weak self] single in
+    // TODO: - 이상한 channelId랑 token 넣어도 result가 0으로 나옴..
+    
+    public func joinChannel() -> Observable<Bool> {
+        return Observable<Bool>.create { [weak self] emitter in
             guard let self = self else { return Disposables.create() }
             
             let option = AgoraRtcChannelMediaOptions()
             option.clientRoleType = self.role
             
-            let result = agoraKit?.joinChannel(byToken: token, channelId: channeldID, uid: uid, mediaOptions: option, joinSuccess: nil)
+            let result = agoraKit.joinChannel(byToken: token, channelId: channeldID, uid: uid, mediaOptions: option, joinSuccess: nil)
             
             print("DEBUG: \(#function) result is \(result)")
         
             if result == 0 {
-                single(.success(true))
+                emitter.onNext(true)
             } else {
-                single(.failure(AgoraRtcError.joinChannel))
+                emitter.onError(AgoraRtcError.joinChannel)
             }
+            
+            emitter.onCompleted()
             
             return Disposables.create()
         }
     }
     
-    public func createCanvas(uid: UInt) -> AgoraRtcVideoCanvas {
-        let canvas = AgoraRtcVideoCanvas()
-        canvas.uid = uid
-        canvas.renderMode = .hidden
-        
-        return canvas
-    }
-    
     public func leaveChannel() {
-        agoraKit?.leaveChannel(nil)
+        agoraKit.leaveChannel(nil)
     }
-    
-    public func printddd() {
-        print("212312312312312312312312323")
-    }
+
 }
+
+

@@ -17,6 +17,8 @@ import MetalKit
 import RxSwift
 import RxCocoa
 
+import Domain
+
 enum UserClass {
     case local
     case remote
