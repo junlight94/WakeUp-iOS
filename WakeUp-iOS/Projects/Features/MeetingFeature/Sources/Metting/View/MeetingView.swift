@@ -14,6 +14,8 @@ import FlexLayout
 import PinLayout
 import DSKit
 
+import RxCocoa
+import RxSwift
 
 final class MeetingMainView: BaseFlexScrollableView {
     
@@ -22,7 +24,7 @@ final class MeetingMainView: BaseFlexScrollableView {
         $0.textColor = .mainLabelColor
     }
     
-    private let parcitipantsLabel = UILabel().then {
+    internal let joinUserCountLabel = UILabel().then {
         $0.setLabel(text: "{{N}}명 참여중", typo: .regular, size: 16)
         $0.textColor = .meetingColor.parcitipantsColor
     }
@@ -60,7 +62,7 @@ final class MeetingMainView: BaseFlexScrollableView {
             
             flex.addItem().direction(.row).justifyContent(.spaceBetween).alignItems(.start).define { flex in
                 flex.addItem(titleLabel).marginLeft(16).marginBottom(12)
-                flex.addItem(parcitipantsLabel).marginRight(16).marginTop(6)
+                flex.addItem(joinUserCountLabel).marginRight(16).marginTop(6)
             }
             
             flex.addItem().direction(.column).backgroundColor(.meetingColor.backgrounColor).define { flex in
@@ -88,6 +90,14 @@ final class MeetingMainView: BaseFlexScrollableView {
         
         contentView.flex.layout()
         scrollView.contentSize = contentView.frame.size
+    }
+}
+
+extension Reactive where Base: MeetingMainView {
+    var joinUserCount: Binder<Int> {
+        return Binder(base) { view, count in
+            view.joinUserCountLabel.text = "\(count)명 참여중"
+        }
     }
 }
 

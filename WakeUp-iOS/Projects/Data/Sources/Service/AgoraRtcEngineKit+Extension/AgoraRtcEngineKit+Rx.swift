@@ -1,12 +1,11 @@
 //
 //  AgoraRtcEngineKit+Rx.swift
-//  MeetingFeature
+//  Data
 //
-//  Created by 강현준 on 2023/09/04.
+//  Created by 강현준 on 2023/09/12.
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
-import BaseFeatureDependency
 import AVFoundation
 import AgoraRtcKit
 import Foundation
@@ -54,19 +53,6 @@ extension Reactive where Base: AgoraRtcEngineKit {
             }
     }
     
-    func firstRemoteVideoFrameOfUid() -> Observable<(UInt, CGSize)> {
-        return delegate.methodInvoked(#selector(AgoraRtcEngineDelegate.rtcEngine(_:firstRemoteVideoFrameOfUid:size:elapsed:)))
-            .map { a in
-                try castOptionalOrThrow((UInt, CGSize).self, (a[1], a[2]))
-            }
-    }
-    
-    func firstRemoteAudioFrameOfUid() -> Observable<UInt> {
-        return delegate.methodInvoked(#selector(AgoraRtcEngineDelegate.rtcEngine(_:firstRemoteAudioFrameOfUid:elapsed:)))
-            .map { a in
-                try castOptionalOrThrow(UInt.self, a[1])
-            }
-    }
     
     func didOfflineOfUid() -> Observable<UInt> {
         return delegate.methodInvoked(#selector(AgoraRtcEngineDelegate.rtcEngine(_:didOfflineOfUid:reason:)))
@@ -98,6 +84,7 @@ private func engineInvoke<T>(onSuccess: Observable<T>, onError: Observable<T>, m
     }
 }
 
+    /// object인자를 T타입으로 변환해서 해당 object인자만 리턴해줌
 private func castOptionalOrThrow<T>(_ resultType: T.Type, _ object: Any) throws -> T {
     guard let returnValue = object as? T else {
         throw RxCocoaError.castingError(object: object, targetType: resultType)

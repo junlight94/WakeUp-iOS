@@ -22,6 +22,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
         
         /// 모든 의존성 생성
+        registerAgoraService(appID: "e2f642e0bf04462fbcaf831501217b6a", channelID: "TEST", token: "007eJxTYBBfm73ZU/5Shd+1Cc4GiwuPLzro8OHoQnZOzqUmTXOEeFgUGFKN0sxMjFINktIMTEzMjNKSkhPTLIwNTQ0MjQzNk8wSHXQZUxsCGRkM5FhYGBkgEMRnYQhxDQ5hYAAAh/kaxA==", uid: 0, clientRole: .broadcaster)
+        
+        registerAgoraUIInterface()
         registerDependencies()
         
         /// 폰트 생성

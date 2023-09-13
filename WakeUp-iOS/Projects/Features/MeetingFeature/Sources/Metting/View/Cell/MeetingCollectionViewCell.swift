@@ -15,6 +15,7 @@ import PinLayout
 import DSKit
 
 import Core
+import Domain
 
 
 final class MeetingCollectionViewCell: UICollectionViewCell, Identifiable {
@@ -44,6 +45,7 @@ final class MeetingCollectionViewCell: UICollectionViewCell, Identifiable {
         super.layoutSubviews()
         
         videoContainer.pin.all()
+        videoContainer.flex.layout()
     }
     
     func configure(_ user: VideoCallUser) {

@@ -20,36 +20,37 @@ import AVFoundation
 import RxSwift
 import RxCocoa
 
+import Domain
 
 
-class MeetingVC: BaseVC, ViewModelBindable {
+final class MeetingVC: BaseVC, ViewModelBindable {
     
-    let baseflexContainer = BaseFlexScrollableView(mode: .adjustHeight)
+    private let baseflexContainer = BaseFlexScrollableView()
+    private let mainView = MeetingMainView()
     
-    let mainView = MeetingMainView(mode: .adjustHeight)
+    private let agoraUIService: AgoraUIServiceInterface
     
     var viewModel: MeetingViewModel?
-    let disposeBag = DisposeBag()
     
-    var remoteUserIDs: [UInt] = []
+    let disposeBag = DisposeBag()
     
     override func loadView() {
         self.view = mainView
-        
-        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         mainView.setDelegate(self)
-        
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        
-        //        leaveChannel()
+    init(agoraUIService: AgoraUIServiceInterface) {
+        self.agoraUIService = agoraUIService
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     func requestPermission(type: AVMediaType,completion: @escaping(Bool) -> Void) {
@@ -57,8 +58,6 @@ class MeetingVC: BaseVC, ViewModelBindable {
             AVCaptureDevice.requestAccess(for: type, completionHandler: completion)
         }
     }
-    
-    
     
     func showMessage(title: String, text: String, delay: Int = 2) -> Void {
         let deadlineTime = DispatchTime.now() + .seconds(delay)
@@ -77,19 +76,20 @@ class MeetingVC: BaseVC, ViewModelBindable {
         
         canvas.view = view
         
-        if isLocal {
-            viewModel?.rtc.agoraKit.setupLocalVideo(canvas)
-        } else {
-            viewModel?.rtc.agoraKit.setupRemoteVideo(canvas)
-        }
+        agoraUIService.setupVideo(canvas, isLocal: isLocal)
     }
     
     func bindViewModel() {
         let input = MeetingViewModel.Input(
             viewDidLoad: rx.viewWillAppar.take(1).map { _ in () },
-            localUserAudioTapped: mainView.bottomBar.audioButton.rx.tap.asObservable(),
-            localUserVideoTapped: mainView.bottomBar.videoButton.rx.tap.asObservable(),
-            viewDidDisappear: rx.viewDidDisApplear.map { _ in () }.asObservable()
+            localUserAudioTapped: mainView.bottomBar.audioButton.rx.tap
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance),
+            localUserVideoTapped: mainView.bottomBar.videoButton.rx.tap
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance),
+            viewDidDisappear: rx.viewDidDisApplear.map { _ in () }
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance),
+            leaveButtonTapped: mainView.bottomBar.leaveButton.rx.tap
+                .throttle(.seconds(1), scheduler: MainScheduler.asyncInstance)
         )
         
         guard let output = viewModel?.transform(input: input) else { return }
@@ -98,6 +98,7 @@ class MeetingVC: BaseVC, ViewModelBindable {
         bindAlert(input: output)
         bindPermission(input: output)
         bindRemoteuser(input: output)
+        bindAttribute(input: output)
     }
     
     func bindAlert(input: MeetingViewModel.Output) {
@@ -118,12 +119,13 @@ class MeetingVC: BaseVC, ViewModelBindable {
         
         input.setupLocalVideo
             .emit(onNext: { [weak self] _ in
-                guard let self = self,
-                      let canvas = self.viewModel?.rtc.createCanvas(uid: 0) else { return }
+                guard let self = self else { return }
                 
+                let canvas = agoraUIService.createCanvas(uid: 0)
                 self.apply(canvas: canvas, toView: self.mainView.myVideoContainer.videoLayer, isLocal: true)
             })
             .disposed(by: disposeBag)
+        
         
         input.localUser
             .do(onNext: { print("DEBUG: localUserBind \($0)") })
@@ -139,19 +141,31 @@ class MeetingVC: BaseVC, ViewModelBindable {
         input.remoteUsers
             .drive(mainView.collectionView.rx.items) { [weak self] collectionView, index, user in
                 guard let self = self,
-                      let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MeetingCollectionViewCell.identifier, for: IndexPath(row: index, section: 0)) as? MeetingCollectionViewCell else { return UICollectionViewCell()
-                }
+                      let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: MeetingCollectionViewCell.identifier,
+                        for: IndexPath(row: index, section: 0)
+                      ) as? MeetingCollectionViewCell else { return UICollectionViewCell() }
                 
                 let remoteID = user.uid
-                if let videoCanvas = self.viewModel?.rtc.createCanvas(uid: remoteID) {
-                    self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
-                }
                 
+                let videoCanvas = agoraUIService.createCanvas(uid: remoteID)
+                self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
                 cell.configure(user)
                 
                 return cell
             }
             .disposed(by: disposeBag)
+    }
+    
+    func bindAttribute(input: MeetingViewModel.Output) {
+        input.joinUserCount
+            .drive(mainView.rx.joinUserCount)
+            .disposed(by: disposeBag)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        mainView.myVideoContainer.bringComponentoToFront()
     }
 }
 
@@ -164,11 +178,6 @@ extension MeetingVC: UICollectionViewDelegateFlowLayout{
         
         return CGSize(width: itemSize, height: itemSize)
     }
-}
-
-
-struct ResponseObserver {
-    let observer: AnyObserver<Bool>
 }
 
 extension Reactive where Base: MeetingVC {
@@ -206,35 +215,3 @@ extension Reactive where Base: MeetingVC {
         }
     }
 }
-
-//extension MeetingVC: AgoraRtcEngineDelegate {
-//    // 새로운 참여자가 채널에 참여할 때 호출
-//
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
-//        remoteUserIDs.append(uid)
-//        mainView.collectionView.reloadData()
-//    }
-//
-//    // 사용자가 채널을 떠날 때 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
-//        if let index = remoteUserIDs.firstIndex(where: { $0 == uid }) {
-//            remoteUserIDs.remove(at: index)
-//            mainView.collectionView.reloadData()
-//        }
-//    }
-//
-//    // 누군가 Audio를 Mute하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioMuted muted: Bool, byUid uid: UInt) {
-//
-//    }
-//
-//    // 누군가 Video의 상태를 변경하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStateChangedOfUid uid: UInt, state: AgoraVideoRemoteState, reason: AgoraVideoRemoteReason, elapsed: Int) {
-//
-//    }
-//
-//    // 누군가 말을 하면 호출
-//    func rtcEngine(_ engine: AgoraRtcEngineKit, activeSpeaker speakerUid: UInt) {
-//
-//    }
-//}

@@ -1,8 +1,8 @@
 //
 //  AgoraRtcEngineDelegateProxy.swift
-//  MeetingFeature
+//  Data
 //
-//  Created by 강현준 on 2023/09/04.
+//  Created by 강현준 on 2023/09/12.
 //  Copyright © 2023 WakeUp. All rights reserved.
 //
 
@@ -22,6 +22,8 @@ class AgoraRtcEngineDelegateProxy: DelegateProxy<AgoraRtcEngineKit, AgoraRtcEngi
     let didJoinChannelSubject = PublishSubject<(channel: String, uid: UInt)>()
     let didLeaveChannelSubject = PublishSubject<AgoraChannelStats>()
     let didOccurErrorSubject = PublishSubject<AgoraErrorCode>()
+    let didAudioMutedSubject = PublishSubject<(muted: Bool, uid: UInt)>()
+    let didVideoEnabledSubject = PublishSubject<(enabled: Bool, uid: UInt)>()
 
     deinit {
         didJoinChannelSubject.onCompleted()
@@ -53,5 +55,13 @@ extension AgoraRtcEngineDelegateProxy: AgoraRtcEngineDelegate {
         if errorCode.rawValue != 0 {
             didOccurErrorSubject.onNext(errorCode)
         }
+    }
+    
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioMuted muted: Bool, byUid uid: UInt) {
+        didAudioMutedSubject.onNext((muted: muted, uid: uid))
+    }
+    
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didVideoEnabled enabled: Bool, byUid uid: UInt) {
+        didVideoEnabledSubject.onNext((enabled: enabled, uid: uid))
     }
 }
