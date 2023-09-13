@@ -38,6 +38,7 @@ final class MeetingViewModel: ViewModelType {
     var alert = PublishSubject<Alert>()
     let localUser = BehaviorSubject<VideoCallUser>(value: VideoCallUser(uid: 0))
     var remoteUsers = BehaviorSubject<[VideoCallUser]>(value: [])
+    let joinUserCount = BehaviorSubject<Int>(value: 0)
     
     // MARK: - ViewModelInput
     
@@ -57,6 +58,7 @@ final class MeetingViewModel: ViewModelType {
         let alert: Signal<Alert>
         let localUser: Driver<VideoCallUser>
         let remoteUsers: Driver<[VideoCallUser]>
+        let joinUserCount: Driver<Int>
     }
     
     func transform(input: Input) -> Output {
@@ -67,13 +69,15 @@ final class MeetingViewModel: ViewModelType {
         transformRemoteUser()
         transformLeaveChannel(input: input)
         transformSpeaking()
+        transformJoinUserCount()
         
         return Output(
             checkUserPermission: permissionrequest.asSignal(onErrorSignalWith: .empty()),
             setupLocalVideo: setUpLocalVideo.asSignal(onErrorSignalWith: .empty()),
             alert: alert.asSignal(onErrorSignalWith: .empty()),
             localUser: localUser.asDriver(onErrorJustReturn: VideoCallUser(uid: 0)),
-            remoteUsers: remoteUsers.asDriver(onErrorJustReturn: [])
+            remoteUsers: remoteUsers.asDriver(onErrorJustReturn: []),
+            joinUserCount: joinUserCount.asDriver(onErrorJustReturn: 0)
         )
     }
     
@@ -340,6 +344,17 @@ final class MeetingViewModel: ViewModelType {
                 return remoteUsers
             }
             .bind(to: remoteUsers)
+            .disposed(by: disposeBag)
+    }
+    
+    func transformJoinUserCount() {
+        channelJoinned
+            .filter { $0 == true }
+            .withLatestFrom(remoteUsers)
+            .map {
+                $0.count + 1
+            }
+            .bind(to: joinUserCount)
             .disposed(by: disposeBag)
     }
 }

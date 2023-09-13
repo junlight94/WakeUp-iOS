@@ -100,6 +100,7 @@ final class MeetingVC: BaseVC, ViewModelBindable {
         bindAlert(input: output)
         bindPermission(input: output)
         bindRemoteuser(input: output)
+        bindAttribute(input: output)
     }
     
     func bindAlert(input: MeetingViewModel.Output) {
@@ -157,6 +158,12 @@ final class MeetingVC: BaseVC, ViewModelBindable {
                 
                 return cell
             }
+            .disposed(by: disposeBag)
+    }
+    
+    func bindAttribute(input: MeetingViewModel.Output) {
+        input.joinUserCount
+            .drive(mainView.rx.joinUserCount)
             .disposed(by: disposeBag)
     }
     
