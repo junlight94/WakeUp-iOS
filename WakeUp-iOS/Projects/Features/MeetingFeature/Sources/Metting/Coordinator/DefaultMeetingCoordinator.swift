@@ -30,10 +30,15 @@ public final class DefaultMeetingCoordinator: MeetingCoordinator {
     }
     
     public func start() {
-        let meetingVC = MeetingVC()
-        meetingVC.agoraUIService = DIContainer.shared.resolve(AgoraUIServiceInterface.self)
-        let viewModel = MeetingViewModel()
+        let meetingVC = MeetingVC(agoraUIService: DIContainer.shared.resolve(AgoraUIServiceInterface.self))
+        let viewModel = MeetingViewModel(
+            joinChannelUseCase: DIContainer.shared.resolve(JoinVideoCallUseCaseProtocol.self),
+            videoCallUseCase: DIContainer.shared.resolve(VideoCallUseCaseProtocol.self),
+            agoraUIService: DIContainer.shared.resolve(AgoraUIServiceInterface.self)
+        )
         viewModel.coordinator = self
+        
+        // User를 받아서, localUser 생성 후 viewModel.localUser.onNext
         
         viewModel.localUser.onNext(
             VideoCallUser(uid: 0)

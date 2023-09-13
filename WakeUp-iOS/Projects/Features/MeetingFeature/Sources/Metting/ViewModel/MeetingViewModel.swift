@@ -12,33 +12,45 @@ import BaseFeatureDependency
 
 import AgoraRtcKit
 
-// MARK: - TEST
-import Domain // UseCase
-import Core // DIContainer
+import Domain
+import Core
 
 final class MeetingViewModel: ViewModelType {
     
     private let disposeBag = DisposeBag()
+    
     var coordinator: MeetingCoordinator?
     
-    let permissionresult = PublishSubject<Bool>()
-    let permissionResultObserver = PublishSubject<Bool>()
-    let joinChannelTrigger = PublishSubject<Void>()
-    let channelJoinned = BehaviorSubject<Bool>(value: false)
+    private let permissionresult = PublishSubject<Bool>()
+    private let permissionResultObserver = PublishSubject<Bool>()
+    private let joinChannelTrigger = PublishSubject<Void>()
+    private let channelJoinned = BehaviorSubject<Bool>(value: false)
     
-    let joinChannelUseCase: JoinVideoCallUseCaseProtocol = DIContainer.shared.resolve(JoinVideoCallUseCaseProtocol.self)
-    let videoCallUseCase: VideoCallUseCaseProtocol = DIContainer.shared.resolve(VideoCallUseCaseProtocol.self)
+    private let joinChannelUseCase: JoinVideoCallUseCaseProtocol
+    private let videoCallUseCase: VideoCallUseCaseProtocol
     
-    let agoraUIService: AgoraUIServiceInterface = DIContainer.shared.resolve(AgoraUIServiceInterface.self)
+    private let agoraUIService: AgoraUIServiceInterface
 
     // MARK: - Output
     
-    let permissionrequest = PublishSubject<ResponseObserver>()
-    let setUpLocalVideo = PublishSubject<Void>()
-    var alert = PublishSubject<Alert>()
+    private let permissionrequest = PublishSubject<ResponseObserver>()
+    private let setUpLocalVideo = PublishSubject<Void>()
+    private let alert = PublishSubject<BaseFeatureDependency.Alert>()
+    private let remoteUsers = BehaviorSubject<[VideoCallUser]>(value: [])
+    private let joinUserCount = BehaviorSubject<Int>(value: 0)
     let localUser = BehaviorSubject<VideoCallUser>(value: VideoCallUser(uid: 0))
-    var remoteUsers = BehaviorSubject<[VideoCallUser]>(value: [])
-    let joinUserCount = BehaviorSubject<Int>(value: 0)
+    
+    // MARK: - Init
+    
+    init(
+        joinChannelUseCase: JoinVideoCallUseCaseProtocol,
+        videoCallUseCase: VideoCallUseCaseProtocol,
+        agoraUIService: AgoraUIServiceInterface
+    ) {
+        self.joinChannelUseCase = joinChannelUseCase
+        self.videoCallUseCase = videoCallUseCase
+        self.agoraUIService = agoraUIService
+    }
     
     // MARK: - ViewModelInput
     
@@ -348,9 +360,7 @@ final class MeetingViewModel: ViewModelType {
     }
     
     func transformJoinUserCount() {
-        channelJoinned
-            .filter { $0 == true }
-            .withLatestFrom(remoteUsers)
+        remoteUsers
             .map {
                 $0.count + 1
             }

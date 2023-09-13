@@ -20,39 +20,37 @@ import AVFoundation
 import RxSwift
 import RxCocoa
 
-import Domain // AgoraUIServiceInterface
+import Domain
 
 
 final class MeetingVC: BaseVC, ViewModelBindable {
     
-    let baseflexContainer = BaseFlexScrollableView()
+    private let baseflexContainer = BaseFlexScrollableView()
+    private let mainView = MeetingMainView()
     
-    let mainView = MeetingMainView()
-    
-    var agoraUIService: AgoraUIServiceInterface?
+    private let agoraUIService: AgoraUIServiceInterface
     
     var viewModel: MeetingViewModel?
     
     let disposeBag = DisposeBag()
     
-    var remoteUserIDs: [UInt] = []
-    
     override func loadView() {
         self.view = mainView
-        
-        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         mainView.setDelegate(self)
-        
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        
+    init(agoraUIService: AgoraUIServiceInterface) {
+        self.agoraUIService = agoraUIService
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     func requestPermission(type: AVMediaType,completion: @escaping(Bool) -> Void) {
@@ -78,7 +76,7 @@ final class MeetingVC: BaseVC, ViewModelBindable {
         
         canvas.view = view
         
-        agoraUIService?.setupVideo(canvas, isLocal: isLocal)
+        agoraUIService.setupVideo(canvas, isLocal: isLocal)
     }
     
     func bindViewModel() {
@@ -121,9 +119,9 @@ final class MeetingVC: BaseVC, ViewModelBindable {
         
         input.setupLocalVideo
             .emit(onNext: { [weak self] _ in
-                guard let self = self,
-                      let canvas = agoraUIService?.createCanvas(uid: 0) else { return }
+                guard let self = self else { return }
                 
+                let canvas = agoraUIService.createCanvas(uid: 0)
                 self.apply(canvas: canvas, toView: self.mainView.myVideoContainer.videoLayer, isLocal: true)
             })
             .disposed(by: disposeBag)
@@ -150,10 +148,8 @@ final class MeetingVC: BaseVC, ViewModelBindable {
                 
                 let remoteID = user.uid
                 
-                if let videoCanvas = agoraUIService?.createCanvas(uid: remoteID) {
-                    self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
-                }
-
+                let videoCanvas = agoraUIService.createCanvas(uid: remoteID)
+                self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
                 cell.configure(user)
                 
                 return cell
@@ -182,11 +178,6 @@ extension MeetingVC: UICollectionViewDelegateFlowLayout{
         
         return CGSize(width: itemSize, height: itemSize)
     }
-}
-
-
-struct ResponseObserver {
-    let observer: AnyObserver<Bool>
 }
 
 extension Reactive where Base: MeetingVC {
