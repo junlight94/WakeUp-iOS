@@ -37,7 +37,9 @@ extension AppDelegate {
     }
     
     func registerAgoraUIInterface() {
-
+        container.register(interface: AgoraUIServiceInterface.self, implement: { _ in
+            return AgoraRtcService.shared
+        })
     }
 
     func registerDependencies() {

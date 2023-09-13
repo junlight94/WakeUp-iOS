@@ -12,5 +12,8 @@ public protocol AgoraRepositoryProtocol {
     func joinChannel() -> Observable<Bool>
     func observeDidJoinOfUser() -> Observable<VideoCallUser>
     func observeDidOfflineOfUid() -> Observable<UInt>
-    func observeDidUserAudioMuteChanged() -> Observable<(muted: Bool, uid: UInt)>
+    func observeDidUserAudioMuteChanged() -> Observable<VideoCallUserStatusChange>
+    func observeDidUserVideoEnableChanged() -> Observable<VideoCallUserStatusChange>
+    func observeAudioVolumeIndicationOfSpeakers() -> Observable<[VideoCallAudioVolumeInfo]>
+    func leaveChannel() -> Observable<Void>
 }

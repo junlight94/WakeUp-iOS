@@ -31,6 +31,7 @@ public final class DefaultMeetingCoordinator: MeetingCoordinator {
     
     public func start() {
         let meetingVC = MeetingVC()
+        meetingVC.agoraUIService = DIContainer.shared.resolve(AgoraUIServiceInterface.self)
         let viewModel = MeetingViewModel()
         viewModel.coordinator = self
         

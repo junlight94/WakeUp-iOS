@@ -12,7 +12,10 @@ import RxSwift
 public protocol VideoCallUseCaseProtocol {
     func observeDidJoinOfUser() -> Observable<VideoCallUser>
     func observeDidOfflineOfUid() -> Observable<UInt>
-    func observeDidUserAudioMuteChanged() -> Observable<(muted: Bool, uid: UInt)>
+    func observeDidUserAudioMuteChanged() -> Observable<VideoCallUserStatusChange>
+    func observeDidUserVideoEnableChanged() -> Observable<VideoCallUserStatusChange>
+    func observeAudioVolumeIndicationOfSpeakers() -> Observable<[VideoCallAudioVolumeInfo]>
+    func leaveChannel() -> Observable<Void>
 }
 
 public struct VideoCallUseCase: VideoCallUseCaseProtocol {
@@ -31,7 +34,19 @@ public struct VideoCallUseCase: VideoCallUseCaseProtocol {
         return agoraRepository.observeDidOfflineOfUid()
     }
     
-    public func observeDidUserAudioMuteChanged() -> Observable<(muted: Bool, uid: UInt)> {
+    public func observeDidUserAudioMuteChanged() -> Observable<VideoCallUserStatusChange> {
         return agoraRepository.observeDidUserAudioMuteChanged()
+    }
+    
+    public func observeDidUserVideoEnableChanged() -> Observable<VideoCallUserStatusChange> {
+        return agoraRepository.observeDidUserVideoEnableChanged()
+    }
+    
+    public func observeAudioVolumeIndicationOfSpeakers() -> Observable<[VideoCallAudioVolumeInfo]> {
+        return agoraRepository.observeAudioVolumeIndicationOfSpeakers()
+    }
+    
+    public func leaveChannel() -> Observable<Void> {
+        return agoraRepository.leaveChannel()
     }
 }

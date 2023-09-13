@@ -36,7 +36,26 @@ public struct AgoraRepository: AgoraRepositoryProtocol {
         return agoraService.agoraKit.rx.didOfflineOfUid()
     }
     
-    public func observeDidUserAudioMuteChanged() -> Observable<(muted: Bool, uid: UInt)> {
+    public func observeDidUserAudioMuteChanged() -> Observable<VideoCallUserStatusChange> {
         return agoraService.agoraKit.rx.delegate.didAudioMutedSubject
+            .map {
+                VideoCallUserStatusChange(uid: $0.uid, status: $0.muted)
+            }
+    }
+    
+    public func observeDidUserVideoEnableChanged() -> Observable<VideoCallUserStatusChange> {
+        return agoraService.agoraKit.rx.delegate.didVideoEnabledSubject
+            .map {
+                VideoCallUserStatusChange(uid: $0.uid, status: $0.enabled)
+            }
+    }
+    
+    public func observeAudioVolumeIndicationOfSpeakers() -> Observable<[VideoCallAudioVolumeInfo]> {
+        return agoraService.agoraKit.rx.reportAudioVolumeIndicationOfSpeakers()
+            .map { $0.map{ $0.toDomain() } }
+    }
+    
+    public func leaveChannel() -> Observable<Void> {
+        return agoraService.leaveChannel()
     }
 }

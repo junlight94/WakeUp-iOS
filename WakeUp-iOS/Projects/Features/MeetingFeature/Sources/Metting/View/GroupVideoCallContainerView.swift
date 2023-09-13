@@ -46,13 +46,6 @@ final class GroupVideoContainerView: BaseFlexView {
         $0.image = .image(dsimage: .cellCamOffRounded)
     }
     
-    private let isTalkingBorderView = UIView().then {
-        $0.backgroundColor = .clear
-        $0.layer.borderWidth = 4
-        $0.layer.borderColor = UIColor.meetingColor.backgrounColor.cgColor
-        $0.layer.cornerRadius = 16
-    }
-    
     /// Agora로 인해 최상단에 생겨서 컴포넌트를 가리는 뷰
     private var mtkView: UIView?
     
@@ -84,6 +77,9 @@ final class GroupVideoContainerView: BaseFlexView {
         
         if let mtkView = mtkView {
             mtkView.layer.borderColor = user.isSpeaking ? UIColor.meetingColor.talkingBorderColor.cgColor : UIColor.meetingColor.backgrounColor.cgColor
+        } else {
+            videoContainer.layer.borderWidth = 4
+            videoLayer.layer.borderColor = user.isSpeaking ? UIColor.meetingColor.talkingBorderColor.cgColor : UIColor.meetingColor.backgrounColor.cgColor
         }
     }
     

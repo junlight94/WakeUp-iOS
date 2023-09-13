@@ -22,5 +22,5 @@ public protocol AgoraRtcServiceProtocol {
         clientRole: AgoraClientRole
     )
     func joinChannel() -> Observable<Bool>
-    func createCanvas(uid: UInt) -> AgoraRtcVideoCanvas
+    func leaveChannel() -> Observable<Void>
 }

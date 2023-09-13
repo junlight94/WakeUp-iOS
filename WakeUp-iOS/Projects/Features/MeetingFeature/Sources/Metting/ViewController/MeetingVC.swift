@@ -20,6 +20,8 @@ import AVFoundation
 import RxSwift
 import RxCocoa
 
+import Domain // AgoraUIServiceInterface
+
 
 final class MeetingVC: BaseVC, ViewModelBindable {
     
@@ -27,7 +29,10 @@ final class MeetingVC: BaseVC, ViewModelBindable {
     
     let mainView = MeetingMainView()
     
+    var agoraUIService: AgoraUIServiceInterface?
+    
     var viewModel: MeetingViewModel?
+    
     let disposeBag = DisposeBag()
     
     var remoteUserIDs: [UInt] = []
@@ -48,7 +53,6 @@ final class MeetingVC: BaseVC, ViewModelBindable {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         
-        //        leaveChannel()
     }
     
     func requestPermission(type: AVMediaType,completion: @escaping(Bool) -> Void) {
@@ -74,11 +78,7 @@ final class MeetingVC: BaseVC, ViewModelBindable {
         
         canvas.view = view
         
-        if isLocal {
-            AgoraRtcService.shared.agoraKit.setupLocalVideo(canvas)
-        } else {
-            AgoraRtcService.shared.agoraKit.setupRemoteVideo(canvas)
-        }
+        agoraUIService?.setupVideo(canvas, isLocal: isLocal)
     }
     
     func bindViewModel() {
@@ -120,9 +120,8 @@ final class MeetingVC: BaseVC, ViewModelBindable {
         
         input.setupLocalVideo
             .emit(onNext: { [weak self] _ in
-                guard let self = self else { return }
-                
-                let canvas = AgoraRtcService.shared.createCanvas(uid: 0)
+                guard let self = self,
+                      let canvas = agoraUIService?.createCanvas(uid: 0) else { return }
                 
                 self.apply(canvas: canvas, toView: self.mainView.myVideoContainer.videoLayer, isLocal: true)
             })
@@ -150,14 +149,10 @@ final class MeetingVC: BaseVC, ViewModelBindable {
                 
                 let remoteID = user.uid
                 
-                if let videoCanvas = AgoraRtcService.shared.agoraKit.createCanvas(uid: remoteID) {
+                if let videoCanvas = agoraUIService?.createCanvas(uid: remoteID) {
                     self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
                 }
-                
-//                if let videoCanvas = self.viewModel?.rtc.createCanvas(uid: remoteID) {
-//                    self.apply(canvas: videoCanvas, toView: cell.videoContainer.videoLayer, isLocal: false)
-//                }
-                
+
                 cell.configure(user)
                 
                 return cell

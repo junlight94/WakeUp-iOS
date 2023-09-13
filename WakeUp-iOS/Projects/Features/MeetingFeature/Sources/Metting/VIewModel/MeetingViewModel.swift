@@ -15,7 +15,6 @@ import AgoraRtcKit
 // MARK: - TEST
 import Domain // UseCase
 import Core // DIContainer
-import Data // SingleTon AgoraService
 
 final class MeetingViewModel: ViewModelType {
     
@@ -29,6 +28,8 @@ final class MeetingViewModel: ViewModelType {
     
     let joinChannelUseCase: JoinVideoCallUseCaseProtocol = DIContainer.shared.resolve(JoinVideoCallUseCaseProtocol.self)
     let videoCallUseCase: VideoCallUseCaseProtocol = DIContainer.shared.resolve(VideoCallUseCaseProtocol.self)
+    
+    let agoraUIService: AgoraUIServiceInterface = DIContainer.shared.resolve(AgoraUIServiceInterface.self)
 
     // MARK: - Output
     
@@ -59,14 +60,13 @@ final class MeetingViewModel: ViewModelType {
     }
     
     func transform(input: Input) -> Output {
-        
-       
-        
+
         transformPermission(input: input)
         transformJoinChannel(input: input)
         transformLocalUser(input: input)
         transformRemoteUser()
-//        transformLeaveChannel(input: input)
+        transformLeaveChannel(input: input)
+        transformSpeaking()
         
         return Output(
             checkUserPermission: permissionrequest.asSignal(onErrorSignalWith: .empty()),
@@ -131,22 +131,14 @@ final class MeetingViewModel: ViewModelType {
     }
     
     func transformLeaveChannel(input: Input) {
-//        input
-//            .viewDidDisappear
-//            .withUnretained(self)
-//            .subscribe(onNext: { viewModel, _ in
-//                print("DEBUG: LeaveChannel@@@@@@")
-//                viewModel.rtc.leaveChannel()
-//            })
-//            .disposed(by: disposeBag)
-//
-//        input.leaveButtonTapped
-//            .withUnretained(self)
-//            .subscribe(onNext: { viewModel, _ in
-//                print("DEBUG: LeaveChannel@@@@@@")
-//                viewModel.rtc.leaveChannel()
-//            })
-//            .disposed(by: disposeBag)
+        
+        Observable.merge(input.viewDidDisappear, input.leaveButtonTapped)
+            .withUnretained(self)
+            .flatMap { $0.0.videoCallUseCase.leaveChannel() }
+            .subscribe(onNext: {
+                print("DEBUG: LeaveChannel@@@@@@@@")
+            })
+            .disposed(by: disposeBag)
     }
     
     func transformLocalUser(input: Input) {
@@ -157,8 +149,9 @@ final class MeetingViewModel: ViewModelType {
             .subscribe(onNext: { viewModel, status in
                 print("DEBUG: audioStatus: \(status.audio), videoStatus: \(status.video)")
                 
-                AgoraRtcService.shared.agoraKit.enableLocalAudio(!status.audio)
-                AgoraRtcService.shared.agoraKit.enableLocalVideo(!status.video)
+                viewModel.agoraUIService.setupEnableLocalAudio(!status.audio)
+                viewModel.agoraUIService.setupEnableLocalVideo(!status.video)
+                
             })
             .disposed(by: disposeBag)
         
@@ -189,6 +182,7 @@ final class MeetingViewModel: ViewModelType {
         
         let remoteUserJoindOfUser = self.channelJoinned
             .filter { $0 == true }
+            .take(1)
             .withUnretained(self)
             .flatMap { viewModel, _ in
                 viewModel.videoCallUseCase.observeDidJoinOfUser()
@@ -210,6 +204,7 @@ final class MeetingViewModel: ViewModelType {
             
         let remoteUserOfflineOfUid = self.channelJoinned
             .filter { $0 == true }
+            .take(1)
             .withUnretained(self)
             .flatMap { viewModel, _ in
                 viewModel.videoCallUseCase.observeDidOfflineOfUid()
@@ -234,6 +229,7 @@ final class MeetingViewModel: ViewModelType {
         
         let remoteUserAudioMuteChanged = self.channelJoinned
             .filter { $0 == true }
+            .take(1)
             .withUnretained(self)
             .flatMap { viewModel, _ in
                 viewModel.videoCallUseCase.observeDidUserAudioMuteChanged()
@@ -244,7 +240,7 @@ final class MeetingViewModel: ViewModelType {
             .withUnretained(self)
             .subscribe(onNext: { viewModel, combine in
                 let audioChangedUserUid = combine.0.uid
-                let audioChangedValue = combine.0.muted
+                let audioChangedValue = combine.0.status
                 
                 var remoteUsers = combine.1
                 
@@ -260,68 +256,90 @@ final class MeetingViewModel: ViewModelType {
             })
             .disposed(by: disposeBag)
         
-//        let videoEnableChanged = rtc.agoraKit.rx.delegate.didVideoEnabledSubject
-//
-//        videoEnableChanged
-//            .withLatestFrom(
-//                Observable.combineLatest(videoEnableChanged, remoteUsers)
-//            )
-//            .withUnretained(self)
-//            .subscribe(onNext: { viewModel, combine in
-//                let videoChangedUserUid = combine.0.uid
-//                let videoChangedValue = combine.0.enabled
-//
-//                var remoteUsers = combine.1
-//
-//                if let changedUserIndex = remoteUsers.firstIndex(where: { $0.uid == videoChangedUserUid }) {
-//                    remoteUsers[changedUserIndex].isVideoMuted = videoChangedValue
-//                }
-//
-//                viewModel.remoteUsers.onNext(remoteUsers)
-//            })
-//            .disposed(by: disposeBag)
-//
-//
-//        let speaking = rtc.agoraKit.rx.reportAudioVolumeIndicationOfSpeakers()
-//            .map { $0.sorted(by: { $0.uid < $1.uid }) }
-//
-//        let localUserSpeaking = speaking
-//            .map {
-//                return $0.filter { $0.uid == 0 }
-//            }
-//            .map { $0.first }
-//            .compactMap { $0 }
-//            .map { return [$0.uid, $0.vad] }
-//            .distinctUntilChanged()
-//
-//        let remoteUser = speaking
-//            .map { users in
-//                let lastIndex = users.count - 1
-//
-//                return users[1...lastIndex]
-//            }
-//
-//        localUserSpeaking
-//            .withLatestFrom(
-//                Observable.combineLatest(localUserSpeaking, localUser)
-//            )
-//            .withUnretained(self)
-//            .subscribe(onNext: { viewModel, combine in
-//                let speakingUserUid = combine.0[0]
-//                let speakingUserValue = combine.0[1] == 0 ? false : true
-//
-//                var localUserData = combine.1
-//
-//                localUserData.isSpeaking = speakingUserValue
-//
-//                print(localUserData)
-//
-//                viewModel.localUser.onNext(localUserData)
-//            })
-//            .disposed(by: disposeBag)
+        let videoEnableChanged = self.channelJoinned
+            .filter { $0 == true }
+            .take(1)
+            .withUnretained(self)
+            .flatMap { viewModel, _ in
+                viewModel.videoCallUseCase.observeDidUserVideoEnableChanged()
+            }
+        
+        videoEnableChanged
+            .withLatestFrom(
+                Observable.combineLatest(videoEnableChanged, remoteUsers)
+            )
+            .map { changeInfo, users -> [VideoCallUser] in
+                let videoChangedUser = changeInfo
+                let remoteUsers = users
+                
+                let changed = remoteUsers.map { user in
+                    var user = user
+                    if user.uid == videoChangedUser.uid {
+                        user.isAudioMuted = videoChangedUser.status
+                    }
+                    return user
+                }
+                return changed
+            }
+            .bind(to: remoteUsers)
+            .disposed(by: disposeBag)
     }
     
     func transformSpeaking() {
         
+        let speaking = videoCallUseCase.observeAudioVolumeIndicationOfSpeakers()
+            .map { $0.sorted(by: { $0.uid < $1.uid })}
+        
+        let localUserSpeaking = speaking
+            .map {
+                return $0.filter { $0.uid == 0 }
+            }
+            .map { $0.first }
+            .compactMap { $0 }
+            .distinctUntilChanged()
+        
+        localUserSpeaking
+            .withLatestFrom(
+                Observable.combineLatest(localUserSpeaking, localUser)
+            )
+            .map { speakingstatus, localuser -> VideoCallUser in
+                var localuser = localuser
+                localuser.isSpeaking = speakingstatus.vad == 0 ? false : true
+                
+                return localuser
+            }
+            .bind(to: localUser)
+            .disposed(by: disposeBag)
+
+        let remoteUserSpeaking = speaking
+            .map { users in
+                var remoteusers = users
+                
+                if let index = remoteusers.firstIndex(where: { $0.uid == 0}) {
+                    remoteusers.remove(at: index)
+                }
+                return remoteusers
+            }
+            .distinctUntilChanged()
+            
+        remoteUserSpeaking
+            .withLatestFrom(
+                Observable.combineLatest(remoteUserSpeaking, remoteUsers)
+            )
+            .map { remoteUserChanged, remoteUsers in
+                var remoteUsers = remoteUsers
+                
+                let _ = remoteUserChanged.map { changed in
+                    if let index = remoteUsers.firstIndex(where:  { $0.uid == changed.uid}) {
+                        remoteUsers[index].isSpeaking = changed.volume > 5 ? true : false
+                    }
+                }
+                
+                print("DEBUG: RemoteUserChange = \(remoteUserChanged)")
+                print("DEBUG: Remote = \(remoteUsers)")
+                return remoteUsers
+            }
+            .bind(to: remoteUsers)
+            .disposed(by: disposeBag)
     }
 }

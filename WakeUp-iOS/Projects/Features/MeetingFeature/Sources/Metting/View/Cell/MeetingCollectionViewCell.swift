@@ -45,6 +45,7 @@ final class MeetingCollectionViewCell: UICollectionViewCell, Identifiable {
         super.layoutSubviews()
         
         videoContainer.pin.all()
+        videoContainer.flex.layout()
     }
     
     func configure(_ user: VideoCallUser) {
