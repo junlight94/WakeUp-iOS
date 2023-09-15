@@ -12,6 +12,7 @@ public extension Dep {
         public struct Signin {}
         public struct WaitingRoom {}
         public struct Meeting {}
+        public struct Calendar {}
     }
     struct Modules {}
 }
@@ -49,6 +50,11 @@ public extension Dep.Features.WaitingRoom {
 //MARK: Meeting
 public extension Dep.Features.Meeting {
     static let group = "Meeting"
+    static let Feature = Dep.Features.project(name: "Feature", group: group)
+}
+
+public extension Dep.Features.Calendar {
+    static let group = "Calendar"
     static let Feature = Dep.Features.project(name: "Feature", group: group)
 }
 

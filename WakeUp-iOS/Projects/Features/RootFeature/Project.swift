@@ -8,6 +8,7 @@ let project = Project.makeModule(
     internalDependencies: [
         .Features.Signin.Feature,
         .Features.Meeting.Feature,
-        .Features.WaitingRoom.Feature
+        .Features.WaitingRoom.Feature,
+        .Features.Calendar.Feature
     ]
 )
