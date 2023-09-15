@@ -63,4 +63,5 @@ public extension Dep.Modules {
     static let dsKit = Dep.project(target: "DSKit", path: .relativeToModules("DSKit"))
     static let network = Dep.project(target: "Network", path: .relativeToModules("Network"))
     static let thirdPartyLibs = Dep.project(target: "ThirdPartyLibs", path: .relativeToModules("ThirdPartyLibs"))
+    static let wakeupCalendar = Dep.project(target: "WakeUpCalendar", path: .relativeToModules("WakeUpCalendar"))
 }
