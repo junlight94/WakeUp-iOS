@@ -10,7 +10,7 @@ import ProjectDescriptionHelpers
 import DependencyPlugin
 
 let project = Project.makeModule(
-    name: "WakeUpCalendar",
+    name: "WUCalendar",
     targets: [.unitTest, .staticFramework],
     internalDependencies: [
         .core

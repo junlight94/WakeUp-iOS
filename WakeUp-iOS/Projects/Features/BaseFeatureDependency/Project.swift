@@ -8,6 +8,6 @@ let project = Project.makeModule(
     internalDependencies: [
         .domain,
         .Modules.dsKit,
-        .Modules.wakeupCalendar
+        .Modules.wuCalendar
     ]
 )
