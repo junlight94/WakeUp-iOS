@@ -15,4 +15,9 @@ public extension UILabel {
         self.font = .setFont(font: typo, size: size)
         return self
     }
+    
+    func setTitleLabel() {
+        self.text = "아침 기상 모임"
+        self.font = .setFont(font: .bold, size: 24)
+    }
 }

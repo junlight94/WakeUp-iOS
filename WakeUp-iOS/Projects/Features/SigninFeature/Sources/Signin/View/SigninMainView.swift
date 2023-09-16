@@ -17,7 +17,7 @@ import BaseFeatureDependency
 class SigninMainView: BaseFlexScrollableView {
 
     let titleLabel = UILabel().then {
-        $0.setLabel(text: "아침 기상 모임", typo: .bold, size: 24)
+        $0.setTitleLabel()
         $0.textColor = .mainLabelColor
     }
     
