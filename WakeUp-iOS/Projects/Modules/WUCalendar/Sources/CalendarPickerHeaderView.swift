@@ -9,10 +9,10 @@
 import UIKit
 
 final class CalendarPickerHeaderView: UIView {
-    private lazy var monthLabel: UILabel = {
+    lazy var monthLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 26, weight: .bold)
+        label.font = .systemFont(ofSize: 20, weight: .bold)
         label.text = "Month"
         label.accessibilityTraits = .header
         label.isAccessibilityElement = true

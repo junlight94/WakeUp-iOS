@@ -37,8 +37,6 @@ public class WUCalendar: UIView {
     
     private let calendar = Calendar(identifier: .gregorian)
     
-    public var headerViewHeight: CGFloat = 80
-    
     private lazy var dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "d"
@@ -57,6 +55,31 @@ public class WUCalendar: UIView {
     
     private let selectedDateChanged: ((Date) -> Void)
     
+    public var headerViewTitleSize: CGFloat = 20 {
+        didSet {
+            headerView.monthLabel.font = .systemFont(ofSize: headerViewTitleSize, weight: .bold)
+            setNeedsLayout()
+        }
+    }
+    
+    public lazy var headerViewHeight: CGFloat = 80 {
+        didSet {
+            headerViewHeightConstraint.constant = headerViewHeight
+            setNeedsLayout()
+        }
+    }
+    
+    private lazy var collectionViewHeight: CGFloat = frame.height - headerViewHeight {
+        didSet {
+            collectionViewHeightConstraint.constant = collectionViewHeight
+            setNeedsLayout()
+        }
+    }
+    
+    lazy var headerViewHeightConstraint = headerView.heightAnchor.constraint(equalToConstant: headerViewHeight)
+    
+    lazy var collectionViewHeightConstraint = collectionView.heightAnchor.constraint(equalToConstant: collectionViewHeight)
+    
     private var numberOfWeeksInBaseDate: Int {
         calendar.range(of: .weekOfMonth, in: .month, for: baseDate)?.count ?? 0
     }
@@ -72,7 +95,6 @@ public class WUCalendar: UIView {
         self.selectedDateChanged = selectedDateChanged
         super.init(frame: .zero)
         
-        layout()
         setDelegate()
         
         headerView.baseDate = baseDate
@@ -83,6 +105,7 @@ public class WUCalendar: UIView {
     }
     
     public override func layoutSubviews() {
+        super.layoutSubviews()
         layout()
     }
     
@@ -90,14 +113,19 @@ public class WUCalendar: UIView {
         self.addSubview(collectionView)
         self.addSubview(headerView)
         
+        let height = frame.height
+        
+        
+        
         NSLayoutConstraint.activate([
+            headerView.topAnchor.constraint(equalTo: self.topAnchor),
             headerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             headerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            headerView.heightAnchor.constraint(equalToConstant: headerViewHeight),
+            headerViewHeightConstraint,
             collectionView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            collectionView.heightAnchor.constraint(equalToConstant: frame.height - headerViewHeight)
+            collectionViewHeightConstraint
         ])
     }
     
