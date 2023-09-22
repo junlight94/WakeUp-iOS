@@ -24,6 +24,7 @@ public extension UIColor {
     
     static let waitingRoom = WaitingRoomColor()
     static let meetingColor = MeetingColor()
+    static let calendarColor = CalendarColor()
 }
 public struct WaitingRoomColor {
     public let startTimeColor = UIColor(r: 0, g: 0, b: 0, a: 0.87)
@@ -37,4 +38,8 @@ public struct MeetingColor {
     public let talkingBorderColor = UIColor(r: 71, g: 204, b: 71, a: 1)
     public let cameraOffBackgroundColor = UIColor(r: 68, g: 68, b: 68, a: 1)
     
+}
+
+public struct CalendarColor {
+    public let motiveColor = UIColor(r: 0, g: 0, b: 0, a: 0.6)
 }

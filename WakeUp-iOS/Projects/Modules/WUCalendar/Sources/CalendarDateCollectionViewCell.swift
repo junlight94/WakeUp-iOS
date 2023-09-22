@@ -34,6 +34,15 @@ final class CalendarDateCollectionViewCell: UICollectionViewCell {
         return dateFormatter
     }()
     
+    private lazy var markedView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.clipsToBounds = true
+        view.backgroundColor = markedColor
+        
+        return view
+    }()
+    
     static let reuseIdentifier = String(describing: CalendarDateCollectionViewCell.self)
     
     var day: Day? {
@@ -45,6 +54,14 @@ final class CalendarDateCollectionViewCell: UICollectionViewCell {
             updateSelectionStatus()
         }
     }
+    
+    lazy var marked: Bool = false {
+        didSet {
+            updateMarkedStatus()
+        }
+    }
+    
+    var markedColor: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -58,15 +75,13 @@ final class CalendarDateCollectionViewCell: UICollectionViewCell {
     func layout() {
         contentView.addSubview(selectionBackgroundView)
         contentView.addSubview(numberLabel)
+        contentView.addSubview(markedView)
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
-        NSLayoutConstraint.deactivate(selectionBackgroundView.constraints)
-        
-        let size = traitCollection.horizontalSizeClass == .compact ?
-        min(min(frame.width, frame.height) - 10, 60) : 45
+    
+        let size = self.frame.size.width - 20
         
         NSLayoutConstraint.activate([
             numberLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -75,10 +90,19 @@ final class CalendarDateCollectionViewCell: UICollectionViewCell {
             selectionBackgroundView.centerYAnchor.constraint(equalTo: numberLabel.centerYAnchor),
             selectionBackgroundView.centerXAnchor.constraint(equalTo: numberLabel.centerXAnchor),
             selectionBackgroundView.widthAnchor.constraint(equalToConstant: size),
-            selectionBackgroundView.heightAnchor.constraint(equalTo: selectionBackgroundView.widthAnchor)
+            selectionBackgroundView.heightAnchor.constraint(equalTo: selectionBackgroundView.widthAnchor),
+            
+            markedView.centerYAnchor.constraint(equalTo: numberLabel.centerYAnchor),
+            markedView.centerXAnchor.constraint(equalTo: numberLabel.centerXAnchor),
+            markedView.widthAnchor.constraint(equalToConstant: size),
+            markedView.heightAnchor.constraint(equalTo: selectionBackgroundView.widthAnchor)
+            
         ])
         
         selectionBackgroundView.layer.cornerRadius = size / 2
+        markedView.layer.cornerRadius = size / 2
+        
+        updateMarkedStatus()
     }
     
 }
@@ -105,6 +129,15 @@ private extension CalendarDateCollectionViewCell {
         numberLabel.textColor = isWithinDisplayedMonth ? .label : .secondaryLabel
         selectionBackgroundView.isHidden = true
     }
+    
+    func updateMarkedStatus() {
+        if marked {
+            markedView.isHidden = false
+        } else {
+            markedView.isHidden = true
+        }
+    }
+    
 }
 
 

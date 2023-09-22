@@ -55,6 +55,12 @@ public class WUCalendar: UIView {
     
     private let selectedDateChanged: ((Date) -> Void)
     
+    public var markDates: [Date] = [] {
+        didSet {
+            collectionView.reloadData()
+        }
+    }
+    
     public var headerViewTitleSize: CGFloat = 20 {
         didSet {
             headerView.monthLabel.font = .systemFont(ofSize: headerViewTitleSize, weight: .bold)
@@ -84,6 +90,8 @@ public class WUCalendar: UIView {
         calendar.range(of: .weekOfMonth, in: .month, for: baseDate)?.count ?? 0
     }
     
+    public var markedColor: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+    
     public override var backgroundColor: UIColor? {
         didSet {
             collectionView.backgroundColor = backgroundColor
@@ -112,10 +120,6 @@ public class WUCalendar: UIView {
     func layout() {
         self.addSubview(collectionView)
         self.addSubview(headerView)
-        
-        let height = frame.height
-        
-        
         
         NSLayoutConstraint.activate([
             headerView.topAnchor.constraint(equalTo: self.topAnchor),
@@ -239,6 +243,10 @@ private extension WUCalendar {
             isJoined: 0
         )
     }
+    
+    func containsDate(_ date: Date, in dates: [Date]) -> Bool {
+        return markDates.contains { calendar.isDate($0, equalTo: date, toGranularity: .day)}
+    }
 }
 
 extension WUCalendar: UICollectionViewDataSource {
@@ -254,7 +262,11 @@ extension WUCalendar: UICollectionViewDataSource {
             for: indexPath
         ) as? CalendarDateCollectionViewCell else { return UICollectionViewCell() }
         
+        let marked = containsDate(day.date, in: markDates)
+        
         cell.day = day
+        cell.marked = marked
+        cell.markedColor = markedColor
         
         return cell
     }
