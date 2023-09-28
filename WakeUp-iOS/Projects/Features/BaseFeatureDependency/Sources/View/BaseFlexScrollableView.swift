@@ -42,12 +42,12 @@ open class BaseFlexScrollableView: UIView {
     
     open override func layoutSubviews() {
         super.layoutSubviews()
-        rootFlexContainer.pin.all(pin.safeArea)
+        rootFlexContainer.pin.all()
         rootFlexContainer.flex.layout()
         scrollView.pin.all()
         contentView.pin.all()
         
-        contentView.flex.layout(mode: flex_LayoutMode ?? .fitContainer)
+        contentView.flex.layout()
         
         scrollView.contentSize = contentView.frame.size
         

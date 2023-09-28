@@ -145,7 +145,7 @@ public extension Project {
         "CFBundleDevelopmentRegion": "ko",
         "CFBundleVersion": "1",
         "CFBundleIdentifier": "com.quriously.qube.test",
-        "CFBundleDisplayName": "미팅 데모앱",
+        "CFBundleDisplayName": "캘린더 데모앱",
         "UILaunchStoryboardName": "Launch Screen",
         "UIUserInterfaceStyle": "Light",
         "UIRequiresFullScreen": true,
